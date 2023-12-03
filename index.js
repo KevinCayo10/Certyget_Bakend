@@ -3,6 +3,7 @@ const express = require("express");
 const pool = require("./src/config/database");
 const { route } = require("./src/users/user.route");
 const routerUser = require("./src/users/user.route");
+const routerCategory = require("./src/categorias/categorias.route");
 const app = express();
 
 app.use(express.json());
@@ -16,6 +17,7 @@ pool.getConnection((err, connection) => {
   console.log("Conexión exitosa a la base de datos");
 });
 app.use("/api/users", routerUser);
+app.use("/api/category", routerCategory);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
