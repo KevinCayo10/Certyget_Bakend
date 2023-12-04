@@ -1,5 +1,6 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const pool = require("./src/config/database");
 const { route } = require("./src/users/user.route");
 const routerUser = require("./src/users/user.route");
@@ -8,6 +9,7 @@ const routerInstructores = require("./src/instructores/instructores.route");
 const app = express();
 
 app.use(express.json());
+app.use(cors());
 // For pool initialization, see above
 
 pool.getConnection((err, connection) => {
