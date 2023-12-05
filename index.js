@@ -6,6 +6,7 @@ const { route } = require("./src/users/user.route");
 const routerUser = require("./src/users/user.route");
 const routerCategory = require("./src/categorias/categorias.route");
 const routerInstructores = require("./src/instructores/instructores.route");
+const routerCursos = require("./src/cursos/cursos.route");
 const app = express();
 
 app.use(express.json());
@@ -22,6 +23,7 @@ pool.getConnection((err, connection) => {
 app.use("/api/users", routerUser);
 app.use("/api/category", routerCategory);
 app.use("/api/instructor", routerInstructores);
+app.use("/api/cursos", routerCursos);
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
