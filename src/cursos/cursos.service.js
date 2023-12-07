@@ -22,6 +22,7 @@ const createCursos = (data, callBack) => {
     }
   );
 };
+
 const createCursosPromise = (data) => {
   return new Promise((resolve, reject) => {
     createCursos(data, (err, id_cur) => {
