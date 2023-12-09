@@ -5,7 +5,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 const { checkToken } = require("../auth/token.js");
 const { createCurso, getCursos } = require("./cursos.controller.js");
 
-routerCursos.post("/", upload.single("plantilla_cer"), createCurso);
+routerCursos.post("/", upload.single("url_firma"), createCurso);
 routerCursos.get("/", getCursos);
 
 module.exports = routerCursos;

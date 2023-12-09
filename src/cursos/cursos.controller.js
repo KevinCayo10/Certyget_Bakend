@@ -44,6 +44,31 @@ const createCurso = async (req, res) => {
     body.id_cur_cer = await createPlantillaCerPromise(url_firma);
     //2do Registrar el curso
     const id_cur = await createCursosPromise(body);
+    const ced_inst_array = (body.ced_inst || "").split(",").map(Number); // Dividir la cadena y convertir a números
+    console.log("CED ARRAY : ", ced_inst_array);
+    const detallePromises = ced_inst_array.map(async (ced_inst) => {
+      const detalle = {
+        id_cur: id_cur,
+        id_inst: ced_inst,
+      };
+      return new Promise((resolve, reject) => {
+        createDetalleCursos(detalle, (err, results) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(results);
+          }
+        });
+      });
+    });
+
+    // Esperar a que se completen todas las inserciones en detalle_cursos
+    const detalleResults = await Promise.all(detallePromises);
+    return res.status(200).json({
+      success: 1,
+      data: detalleResults, // Puedes devolver los resultados de cada inserción si es necesario
+    });
+    /*
     const detalle = {
       id_cur: id_cur,
       id_inst: body.ced_inst,
@@ -57,11 +82,12 @@ const createCurso = async (req, res) => {
           message: "Database connection errror",
         });
       }
-      return res.status(200).json({
-        success: 1,
-        data: results,
-      });
     });
+    return res.status(200).json({
+      success: 1,
+      data: results,
+    });
+    */
   } catch (error) {
     console.log(error);
     return res.status(500).json({
