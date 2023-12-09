@@ -7,10 +7,10 @@ const {
   updateCategory,
   deleteCategory,
 } = require("./categorias.controller");
-routerCategory.post("/", checkToken, createCategory);
-routerCategory.get("/", checkToken, getCategorys);
-routerCategory.get("/:id_cate", checkToken, getCategory);
-routerCategory.put("/:id_cate", checkToken, updateCategory);
-routerCategory.delete("/:id_cate", checkToken, deleteCategory);
+routerCategory.post("/", createCategory);
+routerCategory.get("/", getCategorys);
+routerCategory.get("/:id_cate", getCategory);
+routerCategory.put("/:id_cate", updateCategory);
+routerCategory.delete("/:id_cate", deleteCategory);
 
 module.exports = routerCategory;
