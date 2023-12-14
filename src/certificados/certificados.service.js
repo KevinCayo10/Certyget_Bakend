@@ -1,6 +1,26 @@
 const pool = require("../config/database");
 // query donde ingrese el id curso y retorna la información para el certificado
 
+const getCertificadoData = (callBack) => {
+  pool.query(
+    `SELECT
+      gc.*,
+      p.*
+    FROM
+      generar_certificados gc
+    JOIN
+      participantes p ON p.ced_par = gc.ced_par_cer
+    `,
+    [],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      return callBack(null, results);
+    }
+  );
+};
+
 const getCertificadoByIdCursos = (id_cur, callBack) => {
   pool.query(
     `SELECT
@@ -97,4 +117,5 @@ module.exports = {
   getDetalleCursosByIdCurso,
   getDetalleInstructoresByIdCurso,
   getCertificadoByIdCursos,
+  getCertificadoData,
 };

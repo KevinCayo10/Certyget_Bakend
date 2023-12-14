@@ -2,9 +2,23 @@ const {
   getCertificadoByIdCursos,
   getDetalleCursosByIdCurso,
   getDetalleInstructoresByIdCurso,
+  getCertificadoData,
 } = require("./certificados.service");
 
 const registerCertificado = (req, res) => {};
+
+const getCertificados = (req, res) => {
+  getCertificadoData((err, results) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    return res.json({
+      success: 1,
+      data: results,
+    });
+  });
+};
 
 const getCertificadosByCursos = (req, res) => {
   getCertificadoByIdCursos(req.params.id_cur, (err, results) => {
@@ -64,4 +78,8 @@ const obtenerDetalleInstructores = (id_cur) => {
     });
   });
 };
-module.exports = { getCertificadosByCursos, getDetalleCursosInstructores };
+module.exports = {
+  getCertificadosByCursos,
+  getDetalleCursosInstructores,
+  getCertificados,
+};
