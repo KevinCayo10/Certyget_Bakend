@@ -166,12 +166,6 @@ const deleteInstructor = (req, res) => {
       console.log(err);
       return;
     }
-    // if (!results) {
-    //   return res.json({
-    //     success: 0,
-    //     message: "Record not Found",
-    //   });
-    // }
     return res.json({
       success: 1,
       message: "Instructor deleted successfully",
