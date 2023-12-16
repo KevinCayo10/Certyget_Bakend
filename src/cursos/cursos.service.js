@@ -49,6 +49,7 @@ const createPlantillaCer = (plantilla_cer, callBack) => {
     }
   );
 };
+
 const createPlantillaCerPromise = (plantilla_cer) => {
   return new Promise((resolve, reject) => {
     createPlantillaCer(plantilla_cer, (err, id_cer) => {
@@ -91,6 +92,52 @@ const getCursosData = (callBack) => {
   );
 };
 
+const updateCursosByCursos = (id_cu, data, callBack) => {
+  pool.query(
+    `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?, id_cate_cur=?, id_cur_cer=? WHERE id_cur=?`,
+    [
+      data.nom_cur,
+      data.fecha_inicio_cur,
+      data.fecha_fin_cur,
+      data.dur_cur,
+      data.id_cate_cur,
+      data.id_cur_cer,
+      id_cu,
+    ],
+    (err, results) => {
+      if (err) {
+        return callBack(err);
+      }
+      return callBack(null, results);
+    }
+  );
+};
+
+const deleteCursoInDetalleCursos = (id_cur, callBack) => {
+  pool.query(
+    `DELETE FROM detalle_cursos WHERE id_cur=?`,
+    [id_cur],
+    (error, results, fields) => {
+      if (error) {
+        return callBack(error);
+      }
+      return callBack(null, results[0]);
+    }
+  );
+};
+
+const deleteCursoByIdCursos = (id_cur, callBack) => {
+  pool.query(
+    `DELETE FROM cursos WHERE id_cur=?`,
+    [id_cur],
+    (error, results, fields) => {
+      if (error) {
+        return callBack(error);
+      }
+      return callBack(null, results[0]);
+    }
+  );
+};
 module.exports = {
   createCursos,
   createPlantillaCer,
@@ -98,4 +145,7 @@ module.exports = {
   createPlantillaCerPromise,
   createCursosPromise,
   getCursosData,
+  updateCursosByCursos,
+  deleteCursoInDetalleCursos,
+  deleteCursoByIdCursos,
 };
