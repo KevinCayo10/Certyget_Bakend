@@ -9,6 +9,12 @@ const multer = require("multer");
 
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
 
+const { v4: uuidv4 } = require("uuid");
+
+function generateUniqueId() {
+  return uuidv4();
+}
+
 const registerInstructor = async (req, res) => {
   try {
     //Verficar si existe el archivo
@@ -27,8 +33,8 @@ const registerInstructor = async (req, res) => {
     }
 
     const fileExtension = req.file.originalname.split(".").pop();
-    const fileName = `${body.ced_inst}.${fileExtension}`;
-    const file = bucket.file(`firmas_autoridades/${fileName}`);
+    const fileName = `${ced_inst}_${generateUniqueId()}.${fileExtension}`;
+    const file = bucket.file(`firmas_autoridades/${ced_inst}/${fileName}`);
     // Subir archivo al bucket utilizando un buffer
     await file.save(req.file.buffer, {
       resumable: false,
@@ -120,8 +126,8 @@ const updateInstructor = async (req, res) => {
     }
 
     const fileExtension = req.file.originalname.split(".").pop();
-    const fileName = `${ced_inst}.${fileExtension}`;
-    const file = bucket.file(`firmas_autoridades/${fileName}`);
+    const fileName = `${ced_inst}_${generateUniqueId()}.${fileExtension}`;
+    const file = bucket.file(`firmas_autoridades/${ced_inst}/${fileName}`);
     console.log("FILE : ", file);
     // Subir archivo al bucket utilizando un buffer
     await file.save(req.file.buffer, {
