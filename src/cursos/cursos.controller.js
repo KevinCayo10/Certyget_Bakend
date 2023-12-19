@@ -121,28 +121,26 @@ const updateCurso = async (req, res) => {
       });
     }
   });
-  if (!req.file) {
-    return res
-      .status(400)
-      .send({ success: 0, message: "Please upload a file!" });
+  if (req.file) {
+    const fileExtension = req.file.originalname.split(".").pop();
+    const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
+    const file = bucket.file(`plantilla_cursos/${body.num_cur}/${fileName}`);
+    // Subir archivo al bucket utilizando un buffer
+    await file.save(req.file.buffer, {
+      resumable: false,
+      contentType: req.file.mimetype, // Asegúrate de que el mimetype sea correcto
+    });
+    try {
+      await file.makePublic();
+    } catch (error) {
+      console.error("Error al hacer público el archivo:", error);
+    }
+    //Guardar toda la información en la base de datos
+    const url_firma = file.publicUrl();
+    body.id_cur_cer = await createPlantillaCerPromise(url_firma);
   }
-  const fileExtension = req.file.originalname.split(".").pop();
-  const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
-  const file = bucket.file(`plantilla_cursos/${body.num_cur}/${fileName}`);
-  // Subir archivo al bucket utilizando un buffer
-  await file.save(req.file.buffer, {
-    resumable: false,
-    contentType: req.file.mimetype, // Asegúrate de que el mimetype sea correcto
-  });
-  try {
-    await file.makePublic();
-  } catch (error) {
-    console.error("Error al hacer público el archivo:", error);
-  }
-  //Guardar toda la información en la base de datos
-  const url_firma = file.publicUrl();
+
   //1ro Registrar la plantilla
-  body.id_cur_cer = await createPlantillaCerPromise(url_firma);
 
   updateCursosByCursos(id_cur, body, (err, results) => {
     if (err) {
