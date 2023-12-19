@@ -4,6 +4,7 @@ const {
   deleteInstructors,
   getInstructorsData,
   updateInstructores,
+  getInstructorByCed,
 } = require("./instructores.service");
 const multer = require("multer");
 
