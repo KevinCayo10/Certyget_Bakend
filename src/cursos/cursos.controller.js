@@ -12,6 +12,11 @@ const {
 const multer = require("multer");
 
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
+const { v4: uuidv4 } = require("uuid");
+
+function generateUniqueId() {
+  return uuidv4();
+}
 
 const createCurso = async (req, res) => {
   try {
@@ -28,8 +33,8 @@ const createCurso = async (req, res) => {
         .send({ success: 0, message: "Please upload a file!" });
     }
     const fileExtension = req.file.originalname.split(".").pop();
-    const fileName = `${body.nom_cur}.${fileExtension}`;
-    const file = bucket.file(`plantilla_cursos/${fileName}`);
+    const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
+    const file = bucket.file(`plantilla_cursos/${body.num_cur}/${fileName}`);
     // Subir archivo al bucket utilizando un buffer
     await file.save(req.file.buffer, {
       resumable: false,
@@ -119,8 +124,8 @@ const updateCurso = async (req, res) => {
       .send({ success: 0, message: "Please upload a file!" });
   }
   const fileExtension = req.file.originalname.split(".").pop();
-  const fileName = `${body.nom_cur}.${fileExtension}`;
-  const file = bucket.file(`plantilla_cursos/${fileName}`);
+  const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
+  const file = bucket.file(`plantilla_cursos/${body.num_cur}/${fileName}`);
   // Subir archivo al bucket utilizando un buffer
   await file.save(req.file.buffer, {
     resumable: false,
@@ -187,7 +192,7 @@ const getCursos = (req, res) => {
 const deleteCursos = (req, res) => {
   const id_cur = req.params.id_cur;
 
-  deleteCursoInDetalleCursos(id_cur, (err, results) => {
+  /*deleteCursoInDetalleCursos(id_cur, (err, results) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
@@ -195,7 +200,7 @@ const deleteCursos = (req, res) => {
         message: "Database connection errror",
       });
     }
-  });
+  });*/
   deleteCursoByIdCursos(id_cur, (err, results) => {
     if (err) {
       console.log(err);
