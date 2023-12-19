@@ -107,6 +107,9 @@ const updateInstructor = async (req, res) => {
   try {
     //Verficar si existe el archivo
     const body = req.body;
+    console.log("INST : ", body);
+    console.log("INST FILE  : ", req.file);
+
     const ced_inst = req.params.ced_inst;
     if (!body) {
       return res
@@ -119,34 +122,31 @@ const updateInstructor = async (req, res) => {
         .status(400)
         .send({ success: 0, message: "Please there is not ced_inst" });
     }
-    if (!req.file) {
-      return res
-        .status(400)
-        .send({ success: 0, message: "Please upload a file!" });
-    }
-
-    const fileExtension = req.file.originalname.split(".").pop();
-    const fileName = `${ced_inst}_${generateUniqueId()}.${fileExtension}`;
-    const file = bucket.file(`firmas_autoridades/${ced_inst}/${fileName}`);
-    console.log("FILE : ", file);
-    // Subir archivo al bucket utilizando un buffer
-    await file.save(req.file.buffer, {
-      resumable: false,
-      contentType: req.file.mimetype, // Asegúrate de que el mimetype sea correcto
-    });
-
-    // Hacer el archivo público
-    try {
-      await file.makePublic();
-    } catch (error) {
-      console.error("Error al hacer público el archivo:", error);
-      return res.status(500).send({
-        message: `Uploaded the file successfully: ${fileName}, but public access is denied!`,
-        url: file.publicUrl(),
+    if (req.file) {
+      const fileExtension = req.file.originalname.split(".").pop();
+      const fileName = `${ced_inst}_${generateUniqueId()}.${fileExtension}`;
+      const file = bucket.file(`firmas_autoridades/${ced_inst}/${fileName}`);
+      console.log("FILE : ", file);
+      // Subir archivo al bucket utilizando un buffer
+      await file.save(req.file.buffer, {
+        resumable: false,
+        contentType: req.file.mimetype, // Asegúrate de que el mimetype sea correcto
       });
+
+      // Hacer el archivo público
+      try {
+        await file.makePublic();
+      } catch (error) {
+        console.error("Error al hacer público el archivo:", error);
+        return res.status(500).send({
+          message: `Uploaded the file successfully: ${fileName}, but public access is denied!`,
+          url: file.publicUrl(),
+        });
+      }
+      //Guardar toda la información en la base de datos
+      body.url_firma = file.publicUrl();
     }
-    //Guardar toda la información en la base de datos
-    body.url_firma = file.publicUrl();
+
     updateInstructores(ced_inst, body, (err, results) => {
       if (err) {
         console.log(err);
