@@ -2,8 +2,8 @@ const pool = require("../config/database");
 
 const createCategorys = (data, callBack) => {
   pool.query(
-    `insert into categorias(nom_cate,desc_cate) values(?,?)`,
-    [data.nom_cate, data.desc_cate],
+    `insert into categorias(nom_cate,desc_cate,estado_cate) values(?,?)`,
+    [data.nom_cate, data.desc_cate, 1],
     (error, results, fields) => {
       if (error) {
         callBack(error);
@@ -13,18 +13,22 @@ const createCategorys = (data, callBack) => {
   );
 };
 const getCategorysData = (callBack) => {
-  pool.query(`select * from categorias`, [], (error, results, fields) => {
-    if (error) {
-      return callBack(error);
+  pool.query(
+    `select * from categorias WHERE estado_cate=1`,
+    [],
+    (error, results, fields) => {
+      if (error) {
+        return callBack(error);
+      }
+      console.log("RES :", results);
+      return callBack(null, results);
     }
-    console.log("RES :", results);
-    return callBack(null, results);
-  });
+  );
 };
 
 const getCategorysById = (id_cate, callBack) => {
   pool.query(
-    `select * from categorias where id_cate = ?`,
+    `select * from categorias where id_cate = ? AND estado_cate=1`,
     [id_cate],
     (error, results, fields) => {
       if (error) {
@@ -50,8 +54,8 @@ const updateCategorys = (id_cate, data, callBack) => {
 
 const deleteCategorys = (id_cate, callBack) => {
   pool.query(
-    `delete from categorias where id_cate=?`,
-    [id_cate],
+    `update categorias set estado_cate=? where id_cate=?`,
+    [0, id_cate],
     (error, results, fields) => {
       if (error) {
         return callBack(error);
