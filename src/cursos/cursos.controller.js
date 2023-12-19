@@ -108,6 +108,8 @@ const createCurso = async (req, res) => {
 const updateCurso = async (req, res) => {
   const body = req.body;
   const id_cur = req.params.id_cur;
+  console.log("CURSO : ", body);
+  console.log("CURSO FILE  : ", req.file);
   //Limpiar en el detalle_cursos
   deleteCursoInDetalleCursos(id_cur, (err, results) => {
     if (err) {

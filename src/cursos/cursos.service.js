@@ -79,12 +79,33 @@ const createDetalleCursos = (data, callBack) => {
 
 const getCursosData = (callBack) => {
   pool.query(
-    `SELECT c.*, cat.nom_cate, pc.url_cer
-    FROM cursos c
-    LEFT JOIN categorias cat ON c.id_cate_cur = cat.id_cate
-    LEFT JOIN plantillas_certificados pc ON c.id_cur_cer = pc.id_cer
-    WHERE c.estado_cur = 1`,
+    `SELECT 
+  c.*,
+  cat.nom_cate,
+  pc.url_cer,
+  GROUP_CONCAT(i.ced_inst) AS id_instructores
+FROM cursos c
+LEFT JOIN categorias cat ON c.id_cate_cur = cat.id_cate
+LEFT JOIN plantillas_certificados pc ON c.id_cur_cer = pc.id_cer
+LEFT JOIN detalle_cursos dc ON c.id_cur = dc.id_cur
+LEFT JOIN autoridades i ON dc.id_inst = i.ced_inst
+WHERE c.estado_cur = 1
+GROUP BY c.id_cur`,
     [],
+    (err, results) => {
+      if (err) {
+        return callBack(err);
+      }
+      return callBack(null, results);
+    }
+  );
+};
+const getInstructoreByIdCurso = (id_cur, callBack) => {
+  pool.query(
+    `SELECT i.* FROM instructores i
+    INNER JOIN detalle_cursos dc ON i.ced_inst = dc.id_inst
+    WHERE dc.id_cur = ?`,
+    [id_cur],
     (err, results) => {
       if (err) {
         return callBack(err);
@@ -150,4 +171,5 @@ module.exports = {
   updateCursosByCursos,
   deleteCursoInDetalleCursos,
   deleteCursoByIdCursos,
+  getInstructoreByIdCurso,
 };
