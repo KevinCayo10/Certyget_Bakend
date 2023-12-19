@@ -3,12 +3,13 @@ const pool = require("../config/database");
 const createCursos = (data, callBack) => {
   pool.query(
     `INSERT INTO 
-  cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur, id_cate_cur, id_cur_cer) VALUES (?,?,?,?,?,?)`,
+  cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,estado_cur, id_cate_cur, id_cur_cer) VALUES (?,?,?,?,?,?,?)`,
     [
       data.nom_cur,
       data.fecha_inicio_cur,
       data.fecha_fin_cur,
       data.dur_cur,
+      1,
       data.id_cate_cur,
       data.id_cur_cer,
     ],
@@ -81,7 +82,8 @@ const getCursosData = (callBack) => {
     `SELECT c.*, cat.nom_cate, pc.url_cer
     FROM cursos c
     LEFT JOIN categorias cat ON c.id_cate_cur = cat.id_cate
-    LEFT JOIN plantillas_certificados pc ON c.id_cur_cer = pc.id_cer`,
+    LEFT JOIN plantillas_certificados pc ON c.id_cur_cer = pc.id_cer
+    WHERE c.estado_cur = 1`,
     [],
     (err, results) => {
       if (err) {
@@ -115,7 +117,7 @@ const updateCursosByCursos = (id_cu, data, callBack) => {
 
 const deleteCursoInDetalleCursos = (id_cur, callBack) => {
   pool.query(
-    `DELETE FROM detalle_cursos WHERE id_cur=?`,
+    `DELETE  FROM detalle_cursos  WHERE id_cur=?`,
     [id_cur],
     (error, results, fields) => {
       if (error) {
@@ -128,8 +130,8 @@ const deleteCursoInDetalleCursos = (id_cur, callBack) => {
 
 const deleteCursoByIdCursos = (id_cur, callBack) => {
   pool.query(
-    `DELETE FROM cursos WHERE id_cur=?`,
-    [id_cur],
+    `UPDATE cursos SET estado_cur=?  WHERE id_cur=?`,
+    [0, id_cur],
     (error, results, fields) => {
       if (error) {
         return callBack(error);
