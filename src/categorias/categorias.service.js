@@ -2,7 +2,7 @@ const pool = require("../config/database");
 
 const createCategorys = (data, callBack) => {
   pool.query(
-    `insert into categorias(nom_cate,desc_cate,estado_cate) values(?,?)`,
+    `insert into categorias(nom_cate,desc_cate,estado_cate) values(?,?,?)`,
     [data.nom_cate, data.desc_cate, 1],
     (error, results, fields) => {
       if (error) {
