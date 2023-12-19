@@ -83,7 +83,7 @@ const getCursosData = (callBack) => {
   c.*,
   cat.nom_cate,
   pc.url_cer,
-  GROUP_CONCAT(i.ced_inst) AS id_instructores
+  GROUP_CONCAT(i.ced_inst) AS ced_inst
 FROM cursos c
 LEFT JOIN categorias cat ON c.id_cate_cur = cat.id_cate
 LEFT JOIN plantillas_certificados pc ON c.id_cur_cer = pc.id_cer
