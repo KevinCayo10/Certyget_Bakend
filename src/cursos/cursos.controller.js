@@ -1,3 +1,4 @@
+const { response } = require("express");
 const storage = require("../config/gcloud");
 const {
   createCursos,
@@ -185,11 +186,16 @@ const getCursos = (req, res) => {
       return;
     }
 
+    console.log("ANTES CURSOS : ", results);
     // Procesar resultados para convertir id_instructores en un array
     const cursosConInstructores = results.map((curso) => ({
       ...curso,
-      ced_inst: curso.ced_inst.split(",").map(Number),
+      ced_inst:
+        curso.ced_inst && curso.ced_inst.includes(",")
+          ? curso.ced_inst.split(",").map(Number)
+          : [Number(curso.ced_inst)],
     }));
+    console.log("DESP CURSO: ", results);
 
     return res.json({
       success: 1,
