@@ -188,7 +188,7 @@ const getCursos = (req, res) => {
     // Procesar resultados para convertir id_instructores en un array
     const cursosConInstructores = results.map((curso) => ({
       ...curso,
-      id_instructores: curso.ced_inst.split(",").map(Number),
+      ced_inst: curso.ced_inst.split(",").map(Number),
     }));
 
     return res.json({
