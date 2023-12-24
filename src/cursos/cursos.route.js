@@ -10,9 +10,9 @@ const {
   deleteCursos,
 } = require("./cursos.controller.js");
 
-routerCursos.post("/", upload.single("url_firma"), createCurso);
+routerCursos.post("/", upload.single("url_cer"), createCurso);
 routerCursos.get("/", getCursos);
-routerCursos.put("/:id_cur", upload.single("url_firma"), updateCurso);
+routerCursos.put("/:id_cur", upload.single("url_cer"), updateCurso);
 routerCursos.delete("/:id_cur", deleteCursos);
 
 module.exports = routerCursos;

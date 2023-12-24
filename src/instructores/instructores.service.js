@@ -3,7 +3,7 @@ const pool = require("../config/database");
 const createInstuctores = (data, callBack) => {
   console.log("DATA : ", data);
   pool.query(
-    `insert into autoridades(ced_inst,nom_pat_inst, nom_mat_inst, ape_pat_inst, ape_mat_inst, telf_inst, dir_inst, ciud_inst,tit_inst, puesto_inst, url_firma) values(?,?,?,?,?,?,?,?,?,?,?)`,
+    `insert into autoridades(ced_inst,nom_pat_inst, nom_mat_inst, ape_pat_inst, ape_mat_inst, telf_inst, dir_inst, ciud_inst,tit_inst, puesto_inst, url_firma,estado_inst) values(?,?,?,?,?,?,?,?,?,?,?,?)`,
     [
       data.ced_inst,
       data.nom_pat_inst,
@@ -16,6 +16,7 @@ const createInstuctores = (data, callBack) => {
       data.tit_inst,
       data.puesto_inst,
       data.url_firma,
+      1,
     ],
     (error, results, fields) => {
       if (error) {
@@ -26,17 +27,21 @@ const createInstuctores = (data, callBack) => {
   );
 };
 const getInstructorsData = (callBack) => {
-  pool.query(`select * from autoridades`, [], (error, results, fields) => {
-    if (error) {
-      return callBack(error);
+  pool.query(
+    `select * from autoridades WHERE estado_inst = 1`,
+    [],
+    (error, results, fields) => {
+      if (error) {
+        return callBack(error);
+      }
+      return callBack(null, results);
     }
-    return callBack(null, results);
-  });
+  );
 };
 
 const getInstructorByCed = (ced_inst) => {
   pool.query(
-    `select * from autoridades where ced_inst=?`,
+    `select * from autoridades where ced_inst=? and estado_inst = 1`,
     [ced_inst],
     (error, results, fields) => {
       if (error) {
@@ -73,8 +78,8 @@ const updateInstructores = (ced_inst, data, callBack) => {
 
 const deleteInstructors = (ced_inst, callBack) => {
   pool.query(
-    `delete from autoridades where ced_inst=?`,
-    [ced_inst],
+    `update autoridades set estado_inst=? where ced_inst=?`,
+    [0, ced_inst],
     (error, results, fields) => {
       if (error) {
         return callBack(error);
