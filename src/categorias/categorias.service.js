@@ -20,7 +20,6 @@ const getCategorysData = (callBack) => {
       if (error) {
         return callBack(error);
       }
-      console.log("RES :", results);
       return callBack(null, results);
     }
   );

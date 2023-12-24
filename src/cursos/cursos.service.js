@@ -3,15 +3,15 @@ const pool = require("../config/database");
 const createCursos = (data, callBack) => {
   pool.query(
     `INSERT INTO 
-  cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,estado_cur, id_cate_cur, id_cur_cer) VALUES (?,?,?,?,?,?,?)`,
+  cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,url_cer,estado_cur, id_cate_cur) VALUES (?,?,?,?,?,?,?)`,
     [
       data.nom_cur,
       data.fecha_inicio_cur,
       data.fecha_fin_cur,
       data.dur_cur,
+      data.url_cer,
       1,
       data.id_cate_cur,
-      data.id_cur_cer,
     ],
     (err, res) => {
       if (err) {
@@ -62,19 +62,47 @@ const createPlantillaCerPromise = (plantilla_cer) => {
     });
   });
 };
-
 const createDetalleCursos = (data, callBack) => {
-  pool.query(
-    `INSERT INTO detalle_cursos  (id_cur,id_inst) VALUES (?,?)`,
-    [data.id_cur, data.id_inst],
-    (err, results) => {
+  pool.getConnection((err, connection) => {
+    if (err) {
+      return callBack(err);
+    }
+
+    connection.beginTransaction((err) => {
       if (err) {
+        connection.release();
         return callBack(err);
       }
-      // Recuperar el id_cer del resultado y pasarlo al callback
-      return callBack(null, results);
-    }
-  );
+
+      connection.query(
+        `INSERT INTO detalle_cursos(id_cur, id_inst) VALUES (?, ?)`,
+        [data.id_cur, data.id_inst],
+        (err, results) => {
+          if (err) {
+            return connection.rollback(() => {
+              connection.release();
+              return callBack(err);
+            });
+          }
+
+          connection.commit((err) => {
+            if (err) {
+              return connection.rollback(() => {
+                connection.release();
+                return callBack(err);
+              });
+            }
+
+            connection.release();
+            const insertedId = results.insertId;
+            console.log("DATA DETALLE : ", data.id_cur, data.id_inst);
+            console.log("Inserted ID:", insertedId);
+            return callBack(null, results);
+          });
+        }
+      );
+    });
+  });
 };
 
 const getCursosData = (callBack) => {
@@ -82,11 +110,9 @@ const getCursosData = (callBack) => {
     `SELECT 
   c.*,
   cat.nom_cate,
-  pc.url_cer,
   GROUP_CONCAT(i.ced_inst) AS ced_inst
 FROM cursos c
 LEFT JOIN categorias cat ON c.id_cate_cur = cat.id_cate
-LEFT JOIN plantillas_certificados pc ON c.id_cur_cer = pc.id_cer
 LEFT JOIN detalle_cursos dc ON c.id_cur = dc.id_cur
 LEFT JOIN autoridades i ON dc.id_inst = i.ced_inst
 WHERE c.estado_cur = 1
@@ -117,14 +143,14 @@ const getInstructoreByIdCurso = (id_cur, callBack) => {
 
 const updateCursosByCursos = (id_cu, data, callBack) => {
   pool.query(
-    `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?, id_cate_cur=?, id_cur_cer=? WHERE id_cur=?`,
+    `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?,url_cer=?, id_cate_cur=? WHERE id_cur=?`,
     [
       data.nom_cur,
       data.fecha_inicio_cur,
       data.fecha_fin_cur,
       data.dur_cur,
+      data.url_cer,
       data.id_cate_cur,
-      data.id_cur_cer,
       id_cu,
     ],
     (err, results) => {

@@ -35,7 +35,9 @@ const createCurso = async (req, res) => {
     }
     const fileExtension = req.file.originalname.split(".").pop();
     const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
-    const file = bucket.file(`plantilla_cursos/${body.num_cur}/${fileName}`);
+    const file = bucket.file(
+      `plantilla_cursos/${body.id_cate_cur}/${fileName}`
+    );
     // Subir archivo al bucket utilizando un buffer
     await file.save(req.file.buffer, {
       resumable: false,
@@ -48,9 +50,8 @@ const createCurso = async (req, res) => {
       console.error("Error al hacer público el archivo:", error);
     }
     //Guardar toda la información en la base de datos
-    const url_firma = file.publicUrl();
+    body.url_cer = file.publicUrl();
     //1ro Registrar la plantilla
-    body.id_cur_cer = await createPlantillaCerPromise(url_firma);
     //2do Registrar el curso
     const id_cur = await createCursosPromise(body);
     const ced_inst_array = (body.ced_inst || "").split(",").map(Number); // Dividir la cadena y convertir a números
@@ -122,9 +123,14 @@ const updateCurso = async (req, res) => {
     }
   });
   if (req.file) {
+    console.log("ENTRO IF REQ.FILE");
     const fileExtension = req.file.originalname.split(".").pop();
     const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
-    const file = bucket.file(`plantilla_cursos/${body.num_cur}/${fileName}`);
+    const file = bucket.file(
+      `plantilla_cursos/${body.id_cate_cur}/${fileName}`
+    );
+    console.log("FILE : ", file);
+
     // Subir archivo al bucket utilizando un buffer
     await file.save(req.file.buffer, {
       resumable: false,
@@ -136,8 +142,10 @@ const updateCurso = async (req, res) => {
       console.error("Error al hacer público el archivo:", error);
     }
     //Guardar toda la información en la base de datos
-    const url_firma = file.publicUrl();
-    body.id_cur_cer = await createPlantillaCerPromise(url_firma);
+    console.log("FILE.PUBLICURL() : ", file.publicUrl());
+    body.url_cer = file.publicUrl();
+    console.log("PUBLIC URL : ", body.url_cer);
+    console.log("BODY dentro IF : ", body);
   }
 
   //1ro Registrar la plantilla
@@ -155,16 +163,19 @@ const updateCurso = async (req, res) => {
   const ced_inst_string = body.ced_inst || "";
   const ced_inst_array = (ced_inst_string.match(/\d+/g) || []).map(Number);
 
+  console.log("CED_INST_ARRAY : ", ced_inst_array);
   const detallePromises = ced_inst_array.map(async (ced_inst) => {
     const detalle = {
       id_cur: id_cur,
       id_inst: ced_inst,
     };
+    console.log("detalle ; ", detalle);
     return new Promise((resolve, reject) => {
       createDetalleCursos(detalle, (err, results) => {
         if (err) {
           reject(err);
         } else {
+          console.log("RESULT : ", results);
           resolve(results);
         }
       });
@@ -184,8 +195,8 @@ const getCursos = (req, res) => {
       return;
     }
 
-    console.log("ANTES CURSOS : ", results);
     // Procesar resultados para convertir id_instructores en un array
+    // Procesar  para convertir id_instructores en un array
     const cursosConInstructores = results.map((curso) => ({
       ...curso,
       ced_inst:
@@ -193,7 +204,6 @@ const getCursos = (req, res) => {
           ? curso.ced_inst.split(",").map(Number)
           : [Number(curso.ced_inst)],
     }));
-    console.log("DESP CURSO: ", results);
 
     return res.json({
       success: 1,
