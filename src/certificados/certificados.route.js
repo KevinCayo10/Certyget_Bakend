@@ -6,6 +6,7 @@ const {
   getCertificados,
   registerParticipantes,
   registerCertificado,
+  deleteCertificado,
 } = require("./certificados.controller");
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -14,5 +15,6 @@ routerCertificados.get("/:id_cur", getCertificadosByCursos);
 routerCertificados.get("/", getCertificados);
 routerCertificados.post("/participantes/", registerParticipantes);
 routerCertificados.post("/", upload.single("certificado"), registerCertificado);
+routerCertificados.delete("/:id_gen_cer", deleteCertificado);
 
 module.exports = routerCertificados;

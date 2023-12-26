@@ -6,9 +6,14 @@ const {
   getCertificadoData,
   createParticipantes,
   createCertificado,
+  deleteCertificadoByIdGenCer,
 } = require("./certificados.service");
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
+const { v4: uuidv4 } = require("uuid");
 
+function generateUniqueId() {
+  return uuidv4();
+}
 const registerCertificado = async (req, res) => {
   const body = req.body;
   console.log("CER", body);
@@ -27,7 +32,9 @@ const registerCertificado = async (req, res) => {
 
   const fileExtension = req.file.originalname.split(".").pop();
   const fileName = `${body.ced_par}${body.id_cur}.${fileExtension}`;
-  const file = bucket.file(`certificados/${fileName}`);
+  const file = bucket.file(
+    `certificados/${body.ced_par}/${fileName}_${generateUniqueId()}`
+  );
   // Subir archivo al bucket utilizando un buffer
   await file.save(req.file.buffer, {
     resumable: false,
@@ -45,7 +52,8 @@ const registerCertificado = async (req, res) => {
     });
   }
   //Guardar toda la información en la base de datos
-  const fechaGenCer = new Date().toLocaleDateString();
+  const fechaGenCer = new Date().toISOString().slice(0, 10);
+  console.log("FECHA_GEN_CER _ ", fechaGenCer);
 
   // Guardar toda la información en la base de datos
   const data = {
@@ -101,11 +109,15 @@ const getDetalleCursosInstructores = async (req, res) => {
   try {
     let curso = await obtenerDetalleCursos(req.params.id_cur);
     let instructores = await obtenerDetalleInstructores(req.params.id_cur);
-
+    // Formatear las fechas en el objeto curso
+    console.log("DATA ANTES: ", curso[0]);
+    curso[0].fecha_inicio_cur = formatDate(curso[0].fecha_inicio_cur);
+    curso[0].fecha_fin_cur = formatDate(curso[0].fecha_fin_cur);
+    console.log("CURSO : ", curso[0]);
     return res.json({
       success: 1,
       data: {
-        curso,
+        curso: curso[0],
         instructores,
       },
     });
@@ -117,6 +129,14 @@ const getDetalleCursosInstructores = async (req, res) => {
     });
   }
 };
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const day = date.getDate().toString().padStart(2, "0");
+  const month = (date.getMonth() + 1).toString().padStart(2, "0");
+  const year = date.getFullYear();
+
+  return `${day}/${month}/${year}`;
+};
 const obtenerDetalleCursos = (id_cur) => {
   return new Promise((resolve, reject) => {
     getDetalleCursosByIdCurso(id_cur, (err, results) => {
@@ -124,7 +144,7 @@ const obtenerDetalleCursos = (id_cur) => {
         console.log(err);
         reject(err);
       } else {
-        resolve(results[0]);
+        resolve(results);
       }
     });
   });
@@ -164,10 +184,30 @@ const registerParticipantes = (req, res) => {
     });
   });
 };
+const deleteCertificado = (req, res) => {
+  const id_cer = req.params.id_gen_cer;
+  deleteCertificadoByIdGenCer(id_cer, (err, results) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    if (!results) {
+      return res.json({
+        success: 0,
+        message: "Record not found",
+      });
+    }
+    return res.json({
+      success: 1,
+      message: "Certificado deleted successfully",
+    });
+  });
+};
 module.exports = {
   getCertificadosByCursos,
   getDetalleCursosInstructores,
   getCertificados,
   registerParticipantes,
   registerCertificado,
+  deleteCertificado,
 };

@@ -10,7 +10,7 @@ const getCertificadoData = (callBack) => {
       generar_certificados gc
     JOIN
       participantes p ON p.ced_par = gc.ced_par_cer
-    `,
+    AND gc.estado_cer=1`,
     [],
     (error, results, fields) => {
       if (error) {
@@ -31,7 +31,8 @@ const getCertificadoByIdCursos = (id_cur, callBack) => {
     JOIN
       participantes p ON p.ced_par = gc.ced_par_cer
     WHERE
-      gc.id_cur_cer= ?`,
+      gc.id_cur_cer= ?
+      AND gc.estado_cer=1`,
     [id_cur],
     (error, results, fields) => {
       if (error) {
@@ -43,36 +44,54 @@ const getCertificadoByIdCursos = (id_cur, callBack) => {
 };
 // query para el registro de certificados
 const createCertificado = (data, callBack) => {
+  // Verificar si ya existe un registro con los mismos valores
   pool.query(
-    `insert into generar_certificados(url_gen_cer,estado_cer,fecha_gen_cer, ced_par_cer,id_cur_cer) values(?,?,?,?,?)`,
-    [
-      data.url_gen_cer,
-      data.estado_cer,
-      data.fecha_gen_cer,
-      data.ced_par_cer,
-      data.id_cur_cer,
-    ],
+    `SELECT * FROM generar_certificados WHERE ced_par_cer = ? AND id_cur_cer = ?`,
+    [data.ced_par_cer, data.id_cur_cer],
     (error, results, fields) => {
       if (error) {
         return callBack(error);
       }
-      return callBack(null, results[0]);
+
+      // Si ya existe un registro, devolver un error
+      if (results.length > 0) {
+        return callBack({
+          message: "Ya existe un certificado con estos valores",
+        });
+      }
+
+      // Si no hay duplicados, proceder con la inserción
+      pool.query(
+        `INSERT INTO generar_certificados(url_gen_cer,estado_cer,fecha_gen_cer, ced_par_cer,id_cur_cer) VALUES(?,?,?,?,?)`,
+        [
+          data.url_gen_cer,
+          data.estado_cer,
+          data.fecha_gen_cer,
+          data.ced_par_cer,
+          data.id_cur_cer,
+        ],
+        (insertError, insertResults, insertFields) => {
+          if (insertError) {
+            return callBack(insertError);
+          }
+          return callBack(null, insertResults[0]);
+        }
+      );
     }
   );
 };
+
 //query para obtener el detalle de eventos e instructores
 const getDetalleCursosByIdCurso = (id_cur, callBack) => {
+  console.log("ID_CUR:", id_cur);
   pool.query(
     `SELECT
       c.*,
-      cat.*,
-      pc.url_cer AS url_plantilla
+      cat.*
     FROM
       cursos c
     JOIN
       categorias cat ON c.id_cate_cur = cat.id_cate
-    JOIN
-      plantillas_certificados pc ON c.id_cur_cer = pc.id_cer
     JOIN
       detalle_cursos dc ON c.id_cur = dc.id_cur
     WHERE
@@ -82,10 +101,12 @@ const getDetalleCursosByIdCurso = (id_cur, callBack) => {
       if (error) {
         callBack(error);
       }
+      console.log("RESULTS: ", results);
       return callBack(null, results);
     }
   );
 };
+
 // Para obtener el detalle de instructores
 const getDetalleInstructoresByIdCurso = (id_cur, callBack) => {
   pool.query(
@@ -126,7 +147,7 @@ const createParticipantes = (data, callBack) => {
   ]);
 
   // Query SQL para la inserción múltiple
-  const sql = `INSERT INTO participantes (ced_par, nom_pat_par, nom_mat_par, ape_pat_par, ape_mat_par, telf_par, email_par, dir_par, carrera_par, fac_par, uni_par) VALUES ?`;
+  const sql = `INSERT IGNORE INTO participantes (ced_par, nom_pat_par, nom_mat_par, ape_pat_par, ape_mat_par, telf_par, email_par, dir_par, carrera_par, fac_par, uni_par) VALUES ?`;
 
   // Ejecuta la consulta
   pool.query(sql, [participantesValues], (error, results, fields) => {
@@ -137,6 +158,19 @@ const createParticipantes = (data, callBack) => {
   });
 };
 
+const deleteCertificadoByIdGenCer = (id_gen_cer, callBack) => {
+  pool.query(
+    `UPDATE generar_certificados SET estado_cer=0 WHERE id_gen_cer=?`,
+    [id_gen_cer],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      return callBack(null, results);
+    }
+  );
+};
+
 module.exports = {
   getCertificadoByIdCursos,
   createCertificado,
@@ -145,4 +179,5 @@ module.exports = {
   getCertificadoByIdCursos,
   getCertificadoData,
   createParticipantes,
+  deleteCertificadoByIdGenCer,
 };
