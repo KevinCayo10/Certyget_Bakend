@@ -7,6 +7,7 @@ const {
   createParticipantes,
   createCertificado,
   deleteCertificadoByIdGenCer,
+  getCertificadoByPar,
 } = require("./certificados.service");
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
 const { v4: uuidv4 } = require("uuid");
@@ -203,6 +204,28 @@ const deleteCertificado = (req, res) => {
     });
   });
 };
+const getCertificadoByCedAndApe = (req, res) => {
+  getCertificadoByPar(
+    req.params.ced_par,
+    req.params.ape_par,
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: 0,
+          message: "Record not found",
+        });
+      }
+      return res.json({
+        success: 1,
+        data: results,
+      });
+    }
+  );
+};
 module.exports = {
   getCertificadosByCursos,
   getDetalleCursosInstructores,
@@ -210,4 +233,5 @@ module.exports = {
   registerParticipantes,
   registerCertificado,
   deleteCertificado,
+  getCertificadoByCedAndApe,
 };
