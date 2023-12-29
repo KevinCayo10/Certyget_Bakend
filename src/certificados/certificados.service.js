@@ -171,6 +171,28 @@ const deleteCertificadoByIdGenCer = (id_gen_cer, callBack) => {
   );
 };
 
+const getCertificadoByPar = (ced_par, ape_par, callBack) => {
+  pool.query(
+    `SELECT
+      gc.*,
+      p.*
+    FROM
+      generar_certificados gc
+    JOIN
+      participantes p ON p.ced_par = gc.ced_par_cer
+    WHERE
+      p.ced_par = ?
+      AND p.ape_pat_par = ?
+      AND gc.estado_cer=1`,
+    [ced_par, ape_par],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      return callBack(null, results);
+    }
+  );
+};
 module.exports = {
   getCertificadoByIdCursos,
   createCertificado,
@@ -180,4 +202,5 @@ module.exports = {
   getCertificadoData,
   createParticipantes,
   deleteCertificadoByIdGenCer,
+  getCertificadoByPar,
 };
