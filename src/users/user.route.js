@@ -9,10 +9,10 @@ const {
   deleteUsers,
 } = require("./user.controller");
 routerUser.post("/login", login);
-routerUser.post("/", checkToken, createUser);
-routerUser.get("/", checkToken, getUsers);
-routerUser.get("/:id_usu", checkToken, getUser);
-routerUser.put("/:id_usu", checkToken, updateUsers);
-routerUser.delete("/:id_usu", checkToken, deleteUsers);
+routerUser.post("/", createUser);
+routerUser.get("/", getUsers);
+routerUser.get("/:id_usu", getUser);
+routerUser.put("/:id_usu", updateUsers);
+routerUser.delete("/:id_usu", deleteUsers);
 
 module.exports = routerUser;
