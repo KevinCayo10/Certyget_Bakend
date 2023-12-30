@@ -16,8 +16,8 @@ const createCursos = (data, callBack) => {
   cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,url_cer,estado_cur, id_cate_cur) VALUES (?,?,?,?,?,?,?)`,
     [
       data.nom_cur,
-      data.fecha_inicio_cur,
-      data.fecha_fin_cur,
+      fechaIniFormatted,
+      fechaFinFormatted,
       data.dur_cur,
       data.url_cer,
       1,
