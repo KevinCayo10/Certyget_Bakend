@@ -1,6 +1,11 @@
 const pool = require("../config/database");
 
 const createCursos = (data, callBack) => {
+  const fechaIniFormatted = new Date(data.fecha_inicio_cur)
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
+  
   pool.query(
     `INSERT INTO 
   cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,url_cer,estado_cur, id_cate_cur) VALUES (?,?,?,?,?,?,?)`,
