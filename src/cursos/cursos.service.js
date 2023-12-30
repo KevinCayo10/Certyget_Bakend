@@ -5,6 +5,11 @@ const createCursos = (data, callBack) => {
     .toISOString()
     .slice(0, 19)
     .replace("T", " ");
+
+    const fechaFinFormatted = new Date(data.fecha_fin_cur)
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
   
   pool.query(
     `INSERT INTO 
