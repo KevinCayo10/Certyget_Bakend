@@ -157,6 +157,11 @@ const updateCursosByCursos = (id_cu, data, callBack) => {
   .slice(0, 19)
   .replace("T", " ");
 
+  const fechaFinFormatted = new Date(data.fecha_fin_cur)
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
+
   pool.query(
     `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?,url_cer=?, id_cate_cur=? WHERE id_cur=?`,
     [
