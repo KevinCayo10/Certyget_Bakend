@@ -9,7 +9,7 @@ const createCursos = (data, callBack) => {
     const fechaFinFormatted = new Date(data.fecha_fin_cur)
     .toISOString()
     .slice(0, 19)
-    .replace("T", " ");
+    .replace("T"," ");
   
   pool.query(
     `INSERT INTO 
@@ -155,12 +155,12 @@ const updateCursosByCursos = (id_cu, data, callBack) => {
   const fechaIniFormatted = new Date(data.fecha_inicio_cur)
   .toISOString()
   .slice(0, 19)
-  .replace("T", " ");
+  .replace("T"," ");
 
   const fechaFinFormatted = new Date(data.fecha_fin_cur)
     .toISOString()
     .slice(0, 19)
-    .replace("T", " ");
+    .replace("T"," ");
 
   pool.query(
     `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?,url_cer=?, id_cate_cur=? WHERE id_cur=?`,
