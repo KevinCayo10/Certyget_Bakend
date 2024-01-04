@@ -34,8 +34,8 @@ const registerInstructor = async (req, res) => {
     }
 
     const fileExtension = req.file.originalname.split(".").pop();
-    const fileName = `${ced_inst}_${generateUniqueId()}.${fileExtension}`;
-    const file = bucket.file(`firmas_autoridades/${ced_inst}/${fileName}`);
+    const fileName = `${body.ced_inst}_${generateUniqueId()}.${fileExtension}`;
+    const file = bucket.file(`firmas_autoridades/${body.ced_inst}/${fileName}`);
     // Subir archivo al bucket utilizando un buffer
     await file.save(req.file.buffer, {
       resumable: false,
