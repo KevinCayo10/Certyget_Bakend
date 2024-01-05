@@ -20,6 +20,7 @@ function generateUniqueId() {
 }
 
 const createCurso = async (req, res) => {
+  console.log(req.body);
   try {
     const body = req.body;
     if (!body) {
