@@ -65,9 +65,10 @@ const createCertificado = (data, callBack) => {
 
       // Si no hay duplicados, proceder con la inserción
       pool.query(
-        `INSERT INTO generar_certificados(url_gen_cer,estado_cer,fecha_gen_cer, ced_par_cer,id_cur_cer) VALUES(?,?,?,?,?)`,
+        `INSERT INTO generar_certificados(url_gen_cer, cod_gen_cer, estado_cer, fecha_gen_cer, ced_par_cer,id_cur_cer) VALUES(?,?,?,?,?,?)`,
         [
           data.url_gen_cer,
+          data.id_cur_cer + data.ced_par_cer,
           data.estado_cer,
           data.fecha_gen_cer,
           data.ced_par_cer,
@@ -141,21 +142,23 @@ const createParticipantes = (data, callBack) => {
     participante.nom_mat_par,
     participante.ape_pat_par,
     participante.ape_mat_par,
-    participante.telf_par,
+    participante.telf_par.toString(),
     participante.email_par,
     participante.dir_par,
+    participante.ciud_par,
     participante.carrera_par,
     participante.fac_par,
     participante.uni_par,
   ]);
 
   // Query SQL para la inserción múltiple
-  const sql = `INSERT IGNORE INTO participantes (ced_par, nom_pat_par, nom_mat_par, ape_pat_par, ape_mat_par, telf_par, email_par, dir_par, carrera_par, fac_par, uni_par) VALUES ?`;
+  const sql = `INSERT IGNORE INTO participantes (ced_par, nom_pat_par, nom_mat_par, ape_pat_par, ape_mat_par, telf_par, email_par, dir_par, ciud_par, carrera_par, fac_par, uni_par) VALUES ?`;
 
   // Ejecuta la consulta
   pool.query(sql, [participantesValues], (error, results, fields) => {
     if (error) {
-      return callBack(error);
+      console.error("Error al ejecutar la consulta:", error);
+      return callBack("Error al insertar participantes en la base de datos");
     }
     return callBack(null, results);
   });
@@ -196,6 +199,29 @@ const getCertificadoByPar = (ced_par, ape_par, callBack) => {
     }
   );
 };
+
+const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
+  pool.query(
+    `SELECT 
+    gc.*,
+    p.*,
+    c.*    
+    FROM generar_certificados gc
+    JOIN 
+    participantes p ON p.ced_par=gc.ced_par_cer
+    JOIN
+    cursos c ON c.id_cur=gc.id_cur_cer
+    WHERE cod_gen_cer=?`,
+    [cod_gen_cer],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      console.log(results);
+      return callBack(null, results);
+    }
+  );
+};
 module.exports = {
   getCertificadoByIdCursos,
   createCertificado,
@@ -206,4 +232,5 @@ module.exports = {
   createParticipantes,
   deleteCertificadoByIdGenCer,
   getCertificadoByPar,
+  validateCertificadoByCodGenCer,
 };
