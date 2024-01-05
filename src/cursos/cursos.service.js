@@ -4,13 +4,13 @@ const createCursos = (data, callBack) => {
   const fechaIniFormatted = new Date(data.fecha_inicio_cur)
     .toISOString()
     .slice(0, 19)
-    .replace("T", " ");
+    .replace("T", " ");
 
-    const fechaFinFormatted = new Date(data.fecha_fin_cur)
+  const fechaFinFormatted = new Date(data.fecha_fin_cur)
     .toISOString()
     .slice(0, 19)
-    .replace("T"," ");
-  
+    .replace("T", " ");
+
   pool.query(
     `INSERT INTO 
   cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,url_cer,estado_cur, id_cate_cur) VALUES (?,?,?,?,?,?,?)`,
@@ -153,14 +153,14 @@ const getInstructoreByIdCurso = (id_cur, callBack) => {
 
 const updateCursosByCursos = (id_cu, data, callBack) => {
   const fechaIniFormatted = new Date(data.fecha_inicio_cur)
-  .toISOString()
-  .slice(0, 19)
-  .replace("T"," ");
+    .toISOString()
+    .slice(0, 19)
+    .replace("T", " ");
 
   const fechaFinFormatted = new Date(data.fecha_fin_cur)
     .toISOString()
     .slice(0, 19)
-    .replace("T"," ");
+    .replace("T", " ");
 
   pool.query(
     `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?,url_cer=?, id_cate_cur=? WHERE id_cur=?`,
@@ -205,6 +205,16 @@ const deleteCursoByIdCursos = (id_cur, callBack) => {
       }
       return callBack(null, results[0]);
     }
+  );
+};
+
+const getCursosFilterMobile = (callBack) => {
+  pool.query(
+    `SELECT 
+    c.*,
+    cat.nom_cate,
+    GROUP_CONCAT(i.ced_inst) AS ced_inst`,
+    []
   );
 };
 module.exports = {

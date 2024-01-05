@@ -9,6 +9,8 @@ const {
   deleteCertificadoByIdGenCer,
   getCertificadoByPar,
   validateCertificadoByCodGenCer,
+  getCursosByPar,
+  getCertificadosDataByCursosAndParticipante,
 } = require("./certificados.service");
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
 const { v4: uuidv4 } = require("uuid");
@@ -207,9 +209,52 @@ const deleteCertificado = (req, res) => {
   });
 };
 const getCertificadoByCedAndApe = (req, res) => {
+  let certificados = [];
+  let cursos = [];
   getCertificadoByPar(
     req.params.ced_par,
     req.params.ape_par,
+    (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: 0,
+          message: "Record not found",
+        });
+      }
+      console.log(results);
+      certificados = results;
+      getCursosByPar(req.params.ape_par, req.params.ced_par, (err, results) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        if (!results) {
+          return res.json({
+            success: 0,
+            message: "Record not found",
+          });
+        }
+        cursos = results;
+        return res.json({
+          success: 1,
+          data: {
+            certificados,
+            cursos,
+          },
+        });
+      });
+    }
+  );
+};
+
+const getCertificadoByCursoAndCedAndApe = (req, res) => {
+  getCertificadosDataByCursosAndParticipante(
+    req.params.ced_par,
+    req.params.id_cur,
     (err, results) => {
       if (err) {
         console.log(err);
@@ -259,4 +304,5 @@ module.exports = {
   deleteCertificado,
   getCertificadoByCedAndApe,
   validarCertificado,
+  getCertificadoByCursoAndCedAndApe,
 };
