@@ -27,7 +27,7 @@ app.use("/api/instructor", routerInstructores);
 app.use("/api/cursos", routerCursos);
 app.use("/api/certificados", routerCertificados);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 app.listen(port, () => {
   console.log("server up and running on PORT :", port);
 });
