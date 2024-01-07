@@ -200,6 +200,60 @@ const getCertificadoByPar = (ced_par, ape_par, callBack) => {
   );
 };
 
+const getCursosByPar = (ape_par, ced_par, callBack) => {
+  pool.query(
+    `SELECT
+      c.*
+    FROM
+      generar_certificados gc
+    JOIN
+      cursos c ON c.id_cur = gc.id_cur_cer
+    JOIN
+      participantes p ON p.ced_par = gc.ced_par_cer
+    WHERE
+      p.ape_pat_par = ?
+      AND p.ced_par = ?
+      AND gc.estado_cer=1`,
+    [ape_par, ced_par],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      return callBack(null, results);
+    }
+  );
+};
+
+const getCertificadosDataByCursosAndParticipante = (
+  ced_par,
+  id_cur,
+  callBack
+) => {
+  pool.query(
+    `SELECT
+    gc.*,
+    p.*,
+    c.*
+  FROM
+    generar_certificados gc
+  JOIN
+    participantes p ON p.ced_par = gc.ced_par_cer
+  JOIN
+    cursos c ON c.id_cur = gc.id_cur_cer
+  WHERE
+    p.ced_par = ?
+    AND c.id_cur = ?
+    AND gc.estado_cer=1`,
+    [ced_par, id_cur],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      console.log(results);
+      return callBack(null, results);
+    }
+  );
+};
 const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
   pool.query(
     `SELECT 
@@ -208,7 +262,7 @@ const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
     c.*    
     FROM generar_certificados gc
     JOIN 
-    participantes p ON p.ced_par=gc.ced_par_cer
+    participantes p ON p.ced_par = gc.ced_par_cer
     JOIN
     cursos c ON c.id_cur=gc.id_cur_cer
     WHERE cod_gen_cer=?`,
@@ -233,4 +287,6 @@ module.exports = {
   deleteCertificadoByIdGenCer,
   getCertificadoByPar,
   validateCertificadoByCodGenCer,
+  getCursosByPar,
+  getCertificadosDataByCursosAndParticipante,
 };

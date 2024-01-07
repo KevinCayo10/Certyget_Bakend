@@ -209,6 +209,16 @@ const deleteCursoByIdCursos = (id_cur, callBack) => {
     }
   );
 };
+
+const getCursosFilterMobile = (callBack) => {
+  pool.query(
+    `SELECT 
+    c.*,
+    cat.nom_cate,
+    GROUP_CONCAT(i.ced_inst) AS ced_inst`,
+    []
+  );
+};
 module.exports = {
   createCursos,
   createPlantillaCer,
