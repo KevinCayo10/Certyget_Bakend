@@ -1,4 +1,5 @@
 const storage = require("../config/gcloud");
+const transporter = require("../helpers/mailer");
 const {
   getCertificadoByIdCursos,
   getDetalleCursosByIdCurso,
@@ -68,7 +69,7 @@ const registerCertificado = async (req, res) => {
     id_cur_cer: body.id_cur,
   };
   console.log("BODY: ", data);
-  createCertificado(data, (err, results) => {
+  createCertificado(data, async (err, results) => {
     if (err) {
       console.log(err);
       return res.status(500).json({
@@ -76,6 +77,25 @@ const registerCertificado = async (req, res) => {
         message: "Database connection error",
       });
     }
+
+    const rest = await transporter.sendMail({
+      from: process.env.EMAIL,
+      to: body.email_par,
+      subject: `Certificado del curso '${body.nom_cur}'`,
+      html: `<p>Estimado(a) ${body.nom_par} ${body.ape_par},</p>
+    <p>Adjunto el certificado de participación del curso <b></b>.</p>
+    <p>Atentamente,</p>
+    <p>El equipo de Talento Humano MarsupiCode</p>`,
+      attachments: [
+        {
+          filename: `${fileName}`,
+          path: file.publicUrl(),
+          contentType: req.file.mimetype,
+        },
+      ],
+    });
+
+    console.log(rest);
     return res.status(200).json({
       success: 1,
       data: results,
