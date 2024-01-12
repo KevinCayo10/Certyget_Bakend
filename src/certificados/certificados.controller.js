@@ -68,7 +68,7 @@ const registerCertificado = async (req, res) => {
     ced_par_cer: body.ced_par,
     id_cur_cer: body.id_cur,
   };
-  console.log("BODY: ", data);
+  console.log("BODY: ", body);
   createCertificado(data, async (err, results) => {
     if (err) {
       console.log(err);
