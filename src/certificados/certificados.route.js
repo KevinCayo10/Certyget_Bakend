@@ -22,7 +22,7 @@ routerCertificados.get(
 );
 
 routerCertificados.get("/", getCertificados);
-routerCertificados.get("/validate/code/:cod_gen_cer", validarCertificado);
+routerCertificados.get("/validate/code/cer/:cod_gen_cer", validarCertificado);
 
 routerCertificados.post("/participantes/", registerParticipantes);
 routerCertificados.post("/", upload.single("certificado"), registerCertificado);
