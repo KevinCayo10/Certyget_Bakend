@@ -38,7 +38,7 @@ const registerCertificado = async (req, res) => {
   const fileExtension = req.file.originalname.split(".").pop();
   const fileName = `${body.ced_par}${body.id_cur}.${fileExtension}`;
   const file = bucket.file(
-    `certificados/${body.ced_par}/${fileName}_${generateUniqueId()}`
+    `certificados/${body.ced_par}/${generateUniqueId()}_${fileName}`
   );
   // Subir archivo al bucket utilizando un buffer
   await file.save(req.file.buffer, {
@@ -77,7 +77,7 @@ const registerCertificado = async (req, res) => {
         message: "Database connection error",
       });
     }
-
+    /*
     const rest = await transporter.sendMail({
       from: process.env.EMAIL,
       to: body.email_par,
@@ -94,8 +94,8 @@ const registerCertificado = async (req, res) => {
         },
       ],
     });
+    console.log(rest);*/
 
-    console.log(rest);
     return res.status(200).json({
       success: 1,
       data: results,
