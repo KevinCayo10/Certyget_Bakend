@@ -11,6 +11,7 @@ const {
   deleteCursoByIdCursos,
 } = require("./cursos.service");
 const multer = require("multer");
+// Crea una instancia del bucket de Google Cloud Storage
 
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
 const { v4: uuidv4 } = require("uuid");
@@ -18,6 +19,7 @@ const { v4: uuidv4 } = require("uuid");
 function generateUniqueId() {
   return uuidv4();
 }
+// Controlador para crear un nuevo curso
 
 const createCurso = async (req, res) => {
   console.log(req.body);
@@ -107,6 +109,7 @@ const createCurso = async (req, res) => {
     });
   }
 };
+// Controlador para actualizar un curso
 
 const updateCurso = async (req, res) => {
   const body = req.body;
@@ -123,6 +126,7 @@ const updateCurso = async (req, res) => {
       });
     }
   });
+    // Si se adjunta un nuevo archivo, realiza las operaciones correspondientes
   if (req.file) {
     console.log("ENTRO IF REQ.FILE");
     const fileExtension = req.file.originalname.split(".").pop();
@@ -149,8 +153,7 @@ const updateCurso = async (req, res) => {
     console.log("BODY dentro IF : ", body);
   }
 
-  //1ro Registrar la plantilla
-
+  // Actualiza la información del curso en la base de datos
   updateCursosByCursos(id_cur, body, (err, results) => {
     if (err) {
       console.log(err);
@@ -189,6 +192,7 @@ const updateCurso = async (req, res) => {
     data: detalleResults, // Puedes devolver los resultados de cada inserción si es necesario
   });
 };
+// Controlador para obtener la información de todos los cursos
 const getCursos = (req, res) => {
   getCursosData((err, results) => {
     if (err) {
@@ -212,7 +216,7 @@ const getCursos = (req, res) => {
     });
   });
 };
-
+// Controlador para eliminar un curso
 const deleteCursos = (req, res) => {
   const id_cur = req.params.id_cur;
 
@@ -225,6 +229,7 @@ const deleteCursos = (req, res) => {
       });
     }
   });*/
+    // Elimina el curso y su información asociada en la base de datos
   deleteCursoByIdCursos(id_cur, (err, results) => {
     if (err) {
       console.log(err);
@@ -239,6 +244,7 @@ const deleteCursos = (req, res) => {
     message: "Curso eliminado",
   });
 };
+// Exporta los controladores para su uso en otras partes de la aplicación
 
 module.exports = {
   createCurso,

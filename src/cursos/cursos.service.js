@@ -1,4 +1,5 @@
 const pool = require("../config/database");
+// Función para crear cursos
 
 const createCursos = (data, callBack) => {
   const fechaIniFormatted = new Date(data.fecha_inicio_cur)
@@ -34,6 +35,7 @@ const createCursos = (data, callBack) => {
     }
   );
 };
+// Promesa para crear cursos
 
 const createCursosPromise = (data) => {
   return new Promise((resolve, reject) => {
@@ -46,6 +48,7 @@ const createCursosPromise = (data) => {
     });
   });
 };
+// Función para crear plantillas de certificados
 
 const createPlantillaCer = (plantilla_cer, callBack) => {
   pool.query(
@@ -61,6 +64,7 @@ const createPlantillaCer = (plantilla_cer, callBack) => {
     }
   );
 };
+// Promesa para crear plantillas de certificados
 
 const createPlantillaCerPromise = (plantilla_cer) => {
   return new Promise((resolve, reject) => {
@@ -73,6 +77,8 @@ const createPlantillaCerPromise = (plantilla_cer) => {
     });
   });
 };
+// Función para crear detalles de cursos
+
 const createDetalleCursos = (data, callBack) => {
   pool.getConnection((err, connection) => {
     if (err) {
@@ -115,6 +121,7 @@ const createDetalleCursos = (data, callBack) => {
     });
   });
 };
+// Función para obtener datos de cursos
 
 const getCursosData = (callBack) => {
   pool.query(
@@ -137,6 +144,8 @@ GROUP BY c.id_cur`,
     }
   );
 };
+// Función para obtener instructores por ID de curso
+
 const getInstructoreByIdCurso = (id_cur, callBack) => {
   pool.query(
     `SELECT i.* FROM instructores i
@@ -151,6 +160,7 @@ const getInstructoreByIdCurso = (id_cur, callBack) => {
     }
   );
 };
+// Función para actualizar cursos por ID de curso
 
 const updateCursosByCursos = (id_cu, data, callBack) => {
   const fechaIniFormatted = new Date(data.fecha_inicio_cur)
@@ -183,6 +193,7 @@ const updateCursosByCursos = (id_cu, data, callBack) => {
     }
   );
 };
+// Función para eliminar cursos en la tabla detalle_cursos por ID de curso
 
 const deleteCursoInDetalleCursos = (id_cur, callBack) => {
   pool.query(
@@ -196,6 +207,7 @@ const deleteCursoInDetalleCursos = (id_cur, callBack) => {
     }
   );
 };
+// Función para eliminar cursos por ID de curso
 
 const deleteCursoByIdCursos = (id_cur, callBack) => {
   pool.query(
@@ -209,6 +221,7 @@ const deleteCursoByIdCursos = (id_cur, callBack) => {
     }
   );
 };
+// Función para obtener datos de cursos filtrados para aplicaciones móviles
 
 const getCursosFilterMobile = (callBack) => {
   pool.query(
@@ -219,6 +232,8 @@ const getCursosFilterMobile = (callBack) => {
     []
   );
 };
+// Exporta todas las funciones para su uso en otros archivos
+
 module.exports = {
   createCursos,
   createPlantillaCer,

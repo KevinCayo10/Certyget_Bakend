@@ -1,6 +1,6 @@
+// Importar el módulo de conexión a la base de datos
 const pool = require("../config/database");
-// query donde ingrese el id curso y retorna la información para el certificado
-
+// Función para obtener información de certificados
 const getCertificadoData = (callBack) => {
   pool.query(
     `SELECT
@@ -20,7 +20,7 @@ const getCertificadoData = (callBack) => {
     }
   );
 };
-
+// Función para obtener certificados por ID de cursos
 const getCertificadoByIdCursos = (id_cur, callBack) => {
   pool.query(
     `SELECT
@@ -45,7 +45,7 @@ const getCertificadoByIdCursos = (id_cur, callBack) => {
     }
   );
 };
-// query para el registro de certificados
+// Función para registrar certificados
 const createCertificado = (data, callBack) => {
   // Verificar si ya existe un registro con los mismos valores
   pool.query(
@@ -85,7 +85,7 @@ const createCertificado = (data, callBack) => {
   );
 };
 
-//query para obtener el detalle de eventos e instructores
+// Función para obtener detalles de cursos por ID de curso
 const getDetalleCursosByIdCurso = (id_cur, callBack) => {
   console.log("ID_CUR:", id_cur);
   pool.query(
@@ -111,7 +111,7 @@ const getDetalleCursosByIdCurso = (id_cur, callBack) => {
   );
 };
 
-// Para obtener el detalle de instructores
+// Función para obtener detalles de instructores por ID de curso
 const getDetalleInstructoresByIdCurso = (id_cur, callBack) => {
   pool.query(
     `SELECT
@@ -133,7 +133,7 @@ const getDetalleInstructoresByIdCurso = (id_cur, callBack) => {
     }
   );
 };
-// query para la verificación de duplicación de certificados
+// Función para registrar participantes
 const createParticipantes = (data, callBack) => {
   // Mapea el array de participantes y crea un array de valores para cada participante
   const participantesValues = data.map((participante) => [
@@ -163,7 +163,7 @@ const createParticipantes = (data, callBack) => {
     return callBack(null, results);
   });
 };
-
+// Función para eliminar certificado por ID
 const deleteCertificadoByIdGenCer = (id_gen_cer, callBack) => {
   pool.query(
     `UPDATE generar_certificados SET estado_cer=0 WHERE id_gen_cer=?`,
@@ -176,7 +176,7 @@ const deleteCertificadoByIdGenCer = (id_gen_cer, callBack) => {
     }
   );
 };
-
+// Función para obtener certificados por cédula y apellido
 const getCertificadoByPar = (ced_par, ape_par, callBack) => {
   pool.query(
     `SELECT
@@ -199,7 +199,7 @@ const getCertificadoByPar = (ced_par, ape_par, callBack) => {
     }
   );
 };
-
+// Función para obtener cursos por apellido y cédula
 const getCursosByPar = (ape_par, ced_par, callBack) => {
   pool.query(
     `SELECT
@@ -223,7 +223,7 @@ const getCursosByPar = (ape_par, ced_par, callBack) => {
     }
   );
 };
-
+// Función para obtener certificados por cédula, curso y apellido
 const getCertificadosDataByCursosAndParticipante = (
   ced_par,
   id_cur,
@@ -254,6 +254,7 @@ const getCertificadosDataByCursosAndParticipante = (
     }
   );
 };
+// Función para validar certificado por código
 const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
   pool.query(
     `SELECT 
@@ -276,6 +277,7 @@ const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
     }
   );
 };
+// Exportar las funciones para su uso en otras partes de la aplicación
 module.exports = {
   getCertificadoByIdCursos,
   createCertificado,
