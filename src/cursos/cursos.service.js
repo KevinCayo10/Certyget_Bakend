@@ -133,8 +133,9 @@ FROM cursos c
 LEFT JOIN categorias cat ON c.id_cate_cur = cat.id_cate
 LEFT JOIN detalle_cursos dc ON c.id_cur = dc.id_cur
 LEFT JOIN autoridades i ON dc.id_inst = i.ced_inst
-WHERE c.estado_cur = 1
-GROUP BY c.id_cur`,
+-- WHERE c.estado_cur = 1
+GROUP BY c.id_cur, cat.nom_cate, c.estado_cur  -- Incluye las columnas necesarias para GROUP BY
+ORDER BY c.estado_cur DESC`,
     [],
     (err, results) => {
       if (err) {
@@ -174,7 +175,7 @@ const updateCursosByCursos = (id_cu, data, callBack) => {
     .replace("T", " ");
 
   pool.query(
-    `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?,url_cer=?,det_cer=?, id_cate_cur=? WHERE id_cur=?`,
+    `UPDATE cursos SET nom_cur=?, fecha_inicio_cur=?, fecha_fin_cur=?, dur_cur=?,url_cer=?,det_cer=?, estado_cur=?, id_cate_cur=? WHERE id_cur=?`,
     [
       data.nom_cur,
       fechaIniFormatted,
@@ -182,6 +183,7 @@ const updateCursosByCursos = (id_cu, data, callBack) => {
       data.dur_cur,
       data.url_cer,
       data.det_cer,
+      data.estado_cur,
       data.id_cate_cur,
       id_cu,
     ],

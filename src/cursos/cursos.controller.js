@@ -115,7 +115,6 @@ const updateCurso = async (req, res) => {
   const body = req.body;
   const id_cur = req.params.id_cur;
   console.log("CURSO : ", body);
-  console.log("CURSO FILE  : ", req.file);
   //Limpiar en el detalle_cursos
   deleteCursoInDetalleCursos(id_cur, (err, results) => {
     if (err) {
@@ -128,14 +127,11 @@ const updateCurso = async (req, res) => {
   });
     // Si se adjunta un nuevo archivo, realiza las operaciones correspondientes
   if (req.file) {
-    console.log("ENTRO IF REQ.FILE");
     const fileExtension = req.file.originalname.split(".").pop();
     const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
     const file = bucket.file(
       `plantilla_cursos/${body.id_cate_cur}/${fileName}`
     );
-    console.log("FILE : ", file);
-
     // Subir archivo al bucket utilizando un buffer
     await file.save(req.file.buffer, {
       resumable: false,
@@ -147,13 +143,10 @@ const updateCurso = async (req, res) => {
       console.error("Error al hacer público el archivo:", error);
     }
     //Guardar toda la información en la base de datos
-    console.log("FILE.PUBLICURL() : ", file.publicUrl());
     body.url_cer = file.publicUrl();
-    console.log("PUBLIC URL : ", body.url_cer);
-    console.log("BODY dentro IF : ", body);
   }
 
-  // Actualiza la información del curso en la base de datos
+  // body.estado_cur = body.estado_cur ? 1 : 0;
   updateCursosByCursos(id_cur, body, (err, results) => {
     if (err) {
       console.log(err);
@@ -167,7 +160,6 @@ const updateCurso = async (req, res) => {
   const ced_inst_string = body.ced_inst || "";
   const ced_inst_array = (ced_inst_string.match(/\d+/g) || []).map(Number);
 
-  console.log("CED_INST_ARRAY : ", ced_inst_array);
   const detallePromises = ced_inst_array.map(async (ced_inst) => {
     const detalle = {
       id_cur: id_cur,
@@ -200,8 +192,6 @@ const getCursos = (req, res) => {
       return;
     }
 
-    // Procesar resultados para convertir id_instructores en un array
-    // Procesar  para convertir id_instructores en un array
     const cursosConInstructores = results.map((curso) => ({
       ...curso,
       ced_inst:
@@ -220,16 +210,6 @@ const getCursos = (req, res) => {
 const deleteCursos = (req, res) => {
   const id_cur = req.params.id_cur;
 
-  /*deleteCursoInDetalleCursos(id_cur, (err, results) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({
-        success: 0,
-        message: "Database connection errror",
-      });
-    }
-  });*/
-    // Elimina el curso y su información asociada en la base de datos
   deleteCursoByIdCursos(id_cur, (err, results) => {
     if (err) {
       console.log(err);
