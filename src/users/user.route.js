@@ -1,3 +1,4 @@
+// Importa los módulos necesarios
 const routerUser = require("express").Router();
 const { checkToken } = require("../auth/token.js");
 const {
@@ -8,6 +9,7 @@ const {
   updateUsers,
   deleteUsers,
 } = require("./user.controller");
+// Ruta para la autenticación de usuarios
 routerUser.post("/login", login);
 routerUser.post("/", createUser);
 routerUser.get("/", getUsers);

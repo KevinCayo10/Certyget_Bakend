@@ -1,6 +1,7 @@
 const storage = require("../config/gcloud");
 const transporter = require("../helpers/mailer");
 const {
+  // Importación de funciones desde el servicio de certificados
   getCertificadoByIdCursos,
   getDetalleCursosByIdCurso,
   getDetalleInstructoresByIdCurso,
@@ -13,16 +14,19 @@ const {
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
 } = require("./certificados.service");
+// Configuración del almacenamiento en la nube y otros módulos
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
 const { v4: uuidv4 } = require("uuid");
-
+// Función para generar un ID único
 function generateUniqueId() {
   return uuidv4();
 }
+// Función para registrar un certificado
 const registerCertificado = async (req, res) => {
   const body = req.body;
   console.log("CER", body);
   console.log("FILE : ", req.file);
+  // Validaciones iniciales
   if (!body) {
     return res
       .status(400)
@@ -34,13 +38,13 @@ const registerCertificado = async (req, res) => {
       .status(400)
       .send({ success: 0, message: "Please upload a file!" });
   }
-
+  // Configuración del nombre del archivo y la ruta en el bucket
   const fileExtension = req.file.originalname.split(".").pop();
   const fileName = `${body.ced_par}${body.id_cur}.${fileExtension}`;
   const file = bucket.file(
     `certificados/${body.ced_par}/${generateUniqueId()}_${fileName}`
   );
-  // Subir archivo al bucket utilizando un buffer
+  // Subida del archivo al bucket utilizando un buffer
   await file.save(req.file.buffer, {
     resumable: false,
     contentType: req.file.mimetype, // Asegúrate de que el mimetype sea correcto
@@ -69,6 +73,7 @@ const registerCertificado = async (req, res) => {
     id_cur_cer: body.id_cur,
   };
   console.log("BODY: ", body);
+  // Manejador para crear un certificado
   createCertificado(data, async (err, results) => {
     if (err) {
       console.log(err);
@@ -102,7 +107,7 @@ const registerCertificado = async (req, res) => {
     });
   });
 };
-
+// Endpoint para obtener todos los certificados
 const getCertificados = (req, res) => {
   getCertificadoData((err, results) => {
     if (err) {
@@ -115,7 +120,7 @@ const getCertificados = (req, res) => {
     });
   });
 };
-
+// Endpoint para obtener certificados por curso
 const getCertificadosByCursos = (req, res) => {
   getCertificadoByIdCursos(req.params.id_cur, (err, results) => {
     if (err) {
@@ -128,7 +133,7 @@ const getCertificadosByCursos = (req, res) => {
     });
   });
 };
-
+// Endpoint para obtener detalles de cursos e instructores
 const getDetalleCursosInstructores = async (req, res) => {
   try {
     let curso = await obtenerDetalleCursos(req.params.id_cur);
@@ -153,6 +158,7 @@ const getDetalleCursosInstructores = async (req, res) => {
     });
   }
 };
+// Función para formatear fechas en el formato dd/mm/yyyy
 const formatDate = (dateString) => {
   const date = new Date(dateString);
   const day = date.getDate().toString().padStart(2, "0");
@@ -161,6 +167,7 @@ const formatDate = (dateString) => {
 
   return `${day}/${month}/${year}`;
 };
+// Función para obtener detalles de cursos por ID
 const obtenerDetalleCursos = (id_cur) => {
   return new Promise((resolve, reject) => {
     getDetalleCursosByIdCurso(id_cur, (err, results) => {
@@ -173,7 +180,7 @@ const obtenerDetalleCursos = (id_cur) => {
     });
   });
 };
-
+// Función para obtener detalles de instructores por ID de curso
 const obtenerDetalleInstructores = (id_cur) => {
   return new Promise((resolve, reject) => {
     getDetalleInstructoresByIdCurso(id_cur, (err, results) => {
@@ -186,7 +193,7 @@ const obtenerDetalleInstructores = (id_cur) => {
     });
   });
 };
-
+// Endpoint para registrar participantes
 const registerParticipantes = (req, res) => {
   const body = req.body;
   console.log("BODY PARTICIPANTE  : ", body);
@@ -195,6 +202,7 @@ const registerParticipantes = (req, res) => {
       .status(400)
       .send({ success: 0, message: "Please there are not data" });
   }
+
   createParticipantes(body, (err, results) => {
     if (err) {
       console.log(err);
@@ -209,6 +217,7 @@ const registerParticipantes = (req, res) => {
     });
   });
 };
+// Endpoint para eliminar un certificado por ID
 const deleteCertificado = (req, res) => {
   const id_cer = req.params.id_gen_cer;
   deleteCertificadoByIdGenCer(id_cer, (err, results) => {
@@ -228,6 +237,7 @@ const deleteCertificado = (req, res) => {
     });
   });
 };
+// Endpoint para obtener certificados por número de cédula y apellido
 const getCertificadoByCedAndApe = (req, res) => {
   let certificados = [];
   let cursos = [];
@@ -270,7 +280,7 @@ const getCertificadoByCedAndApe = (req, res) => {
     }
   );
 };
-
+// Endpoint para obtener certificados por ID de curso y número de cédula y apellido
 const getCertificadoByCursoAndCedAndApe = (req, res) => {
   getCertificadosDataByCursosAndParticipante(
     req.params.ced_par,
@@ -293,7 +303,7 @@ const getCertificadoByCursoAndCedAndApe = (req, res) => {
     }
   );
 };
-
+// Endpoint para validar un certificado por código generado
 const validarCertificado = (req, res) => {
   console.log("HOLA MUNDO");
   const cod_gen_cer = req.params.cod_gen_cer;
@@ -315,6 +325,8 @@ const validarCertificado = (req, res) => {
     });
   });
 };
+// Exportar los controladores como módulos
+
 module.exports = {
   getCertificadosByCursos,
   getDetalleCursosInstructores,

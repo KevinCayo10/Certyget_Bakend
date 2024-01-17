@@ -1,4 +1,6 @@
+// Importa el módulo de conexión a la base de datos
 const pool = require("../config/database");
+// Crea un nuevo usuario en la base de datos
 
 const create = (data, callBack) => {
   pool.query(
@@ -13,6 +15,7 @@ const create = (data, callBack) => {
     }
   );
 };
+// Obtiene un usuario por su nombre de usuario
 
 const getUserByUser = (user_usu, callBack) => {
   pool.query(
@@ -26,6 +29,7 @@ const getUserByUser = (user_usu, callBack) => {
     }
   );
 };
+// Obtiene todos los usuarios en la base de datos
 
 const getUserData = (callBack) => {
   pool.query(`select * from usuarios`, [], (error, results, fields) => {
@@ -36,6 +40,7 @@ const getUserData = (callBack) => {
     return callBack(null, results);
   });
 };
+// Obtiene un usuario por su ID
 
 const getUserById = (id_usu, callBack) => {
   pool.query(
@@ -49,6 +54,7 @@ const getUserById = (id_usu, callBack) => {
     }
   );
 };
+// Actualiza la información de un usuario en la base de datos
 
 const updateUser = (id_usu, user, callBack) => {
   pool.query(
@@ -62,6 +68,7 @@ const updateUser = (id_usu, user, callBack) => {
     }
   );
 };
+// Elimina un usuario de la base de datos por su ID
 
 const deleteUser = (id_usu, callBack) => {
   pool.query(
@@ -75,6 +82,8 @@ const deleteUser = (id_usu, callBack) => {
     }
   );
 };
+// Exporta las funciones para ser utilizadas en otras partes de la aplicación
+
 module.exports = {
   getUserByUser,
   create,

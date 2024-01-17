@@ -7,14 +7,18 @@ const {
   getInstructorByCed,
 } = require("./instructores.service");
 const multer = require("multer");
+// Configura el bucket de almacenamiento en Google Cloud utilizando el módulo importado
 
 const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
+// Importa la función UUID del módulo uuid
 
 const { v4: uuidv4 } = require("uuid");
+// Función para generar un ID único utilizando UUID
 
 function generateUniqueId() {
   return uuidv4();
 }
+// Función para registrar un instructor
 
 const registerInstructor = async (req, res) => {
   try {
@@ -72,6 +76,8 @@ const registerInstructor = async (req, res) => {
     res.status(500).send({ message: "Error en el servidor." });
   }
 };
+// Función para obtener todos los instructores
+
 const getInstructors = (req, res) => {
   getInstructorsData((err, results) => {
     if (err) {
@@ -84,6 +90,8 @@ const getInstructors = (req, res) => {
     });
   });
 };
+// Función para obtener un instructor por su cédula
+
 const getInstructor = (req, res) => {
   const ced_inst = req.params.ced_inst;
   getInstructorByCed(ced_inst, (err, results) => {
@@ -103,6 +111,7 @@ const getInstructor = (req, res) => {
     });
   });
 };
+// Función para actualizar la información de un instructor
 
 const updateInstructor = async (req, res) => {
   try {
@@ -147,6 +156,7 @@ const updateInstructor = async (req, res) => {
       //Guardar toda la información en la base de datos
       body.url_firma = file.publicUrl();
     }
+    // Actualiza la información del instructor en la base de datos
 
     updateInstructores(ced_inst, body, (err, results) => {
       if (err) {
@@ -166,6 +176,8 @@ const updateInstructor = async (req, res) => {
     res.status(500).send({ message: "Error en el servidor." });
   }
 };
+// Función para eliminar un instructor por su cédula
+
 const deleteInstructor = (req, res) => {
   const ced_inst = req.params.ced_inst;
   deleteInstructors(ced_inst, (err, results) => {
@@ -179,6 +191,8 @@ const deleteInstructor = (req, res) => {
     });
   });
 };
+// Exporta las funciones para su uso en otros archivos
+
 module.exports = {
   registerInstructor,
   deleteInstructor,

@@ -1,4 +1,6 @@
+// Importa el módulo de conexión a la base de datos
 const pool = require("../config/database");
+// Función para crear instructores en la base de datos
 
 const createInstuctores = (data, callBack) => {
   console.log("DATA : ", data);
@@ -26,6 +28,7 @@ const createInstuctores = (data, callBack) => {
     }
   );
 };
+// Función para obtener datos de todos los instructores activos
 const getInstructorsData = (callBack) => {
   pool.query(
     `select * from autoridades WHERE estado_inst = 1`,
@@ -38,6 +41,7 @@ const getInstructorsData = (callBack) => {
     }
   );
 };
+// Función para obtener un instructor por su cédula
 
 const getInstructorByCed = (ced_inst) => {
   pool.query(
@@ -51,6 +55,7 @@ const getInstructorByCed = (ced_inst) => {
     }
   );
 };
+// Función para actualizar información de instructores
 const updateInstructores = (ced_inst, data, callBack) => {
   pool.query(
     `update autoridades set nom_pat_inst=?, nom_mat_inst=?, ape_pat_inst=?, ape_mat_inst=?, telf_inst=?, dir_inst=?, ciud_inst=?,tit_inst=?, puesto_inst=?, url_firma=? where ced_inst=?`,
@@ -75,6 +80,7 @@ const updateInstructores = (ced_inst, data, callBack) => {
     }
   );
 };
+// Función para desactivar un instructor
 
 const deleteInstructors = (ced_inst, callBack) => {
   pool.query(
@@ -155,6 +161,7 @@ const createCurso = async (req, res) => {
     });
   }
 };
+// Exporta las funciones para su uso en otros archivos
 module.exports = {
   createInstuctores,
   updateInstructores,

@@ -8,7 +8,7 @@ const {
   deleteUser,
 } = require("./user.service");
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
-
+// Función para registrar un nuevo usuario
 const createUser = (req, res) => {
   const body = req.body;
   const salt = genSaltSync(10);
@@ -27,6 +27,7 @@ const createUser = (req, res) => {
     });
   });
 };
+// Función para realizar el proceso de inicio de sesión
 const login = (req, res) => {
   const body = req.body;
   const user_usu = body.user_usu;
@@ -62,6 +63,7 @@ const login = (req, res) => {
     }
   });
 };
+// Función para obtener todos los usuarios
 
 const getUsers = (req, res) => {
   getUserData((err, results) => {
@@ -75,6 +77,7 @@ const getUsers = (req, res) => {
     });
   });
 };
+// Función para obtener un usuario por su ID
 
 const getUser = (req, res) => {
   const id_usu = req.params.id_usu;
@@ -95,6 +98,7 @@ const getUser = (req, res) => {
     });
   });
 };
+// Función para actualizar la información de un usuario
 
 const updateUsers = (req, res) => {
   const body = req.body;
@@ -112,6 +116,7 @@ const updateUsers = (req, res) => {
     });
   });
 };
+// Función para eliminar un usuario
 
 const deleteUsers = (req, res) => {
   const id_usu = req.params.id_usu;
@@ -132,6 +137,8 @@ const deleteUsers = (req, res) => {
     });
   });
 };
+// Exporta las funciones para su uso en otros archivos
+
 module.exports = {
   login,
   createUser,

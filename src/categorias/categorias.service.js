@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-
+// Función para crear una nueva categoría
 const createCategorys = (data, callBack) => {
   pool.query(
     `insert into categorias(nom_cate,desc_cate,estado_cate) values(?,?,?)`,
@@ -12,6 +12,7 @@ const createCategorys = (data, callBack) => {
     }
   );
 };
+// Función para obtener todas las categorías activas
 const getCategorysData = (callBack) => {
   pool.query(
     `select * from categorias WHERE estado_cate=1`,
@@ -24,7 +25,7 @@ const getCategorysData = (callBack) => {
     }
   );
 };
-
+// Función para obtener una categoría por su ID
 const getCategorysById = (id_cate, callBack) => {
   pool.query(
     `select * from categorias where id_cate = ? AND estado_cate=1`,
@@ -37,7 +38,7 @@ const getCategorysById = (id_cate, callBack) => {
     }
   );
 };
-
+// Función para actualizar una categoría por su ID
 const updateCategorys = (id_cate, data, callBack) => {
   pool.query(
     `update categorias set nom_cate=?, desc_cate=? where id_cate=?`,
@@ -50,7 +51,7 @@ const updateCategorys = (id_cate, data, callBack) => {
     }
   );
 };
-
+// Función para marcar una categoría como inactiva por su ID
 const deleteCategorys = (id_cate, callBack) => {
   pool.query(
     `update categorias set estado_cate=? where id_cate=?`,
@@ -63,6 +64,7 @@ const deleteCategorys = (id_cate, callBack) => {
     }
   );
 };
+// Exporta las funciones del módulo
 module.exports = {
   createCategorys,
   getCategorysData,
