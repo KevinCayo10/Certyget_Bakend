@@ -12,6 +12,7 @@ const {
   deleteCursoByIdCursos,
 } = require("./cursos.service");
 const multer = require("multer");
+const { replaceInvalidChars } = require("../utils/invalidChars");
 // Crea una instancia del bucket de Google Cloud Storage
 
 // const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
@@ -22,10 +23,9 @@ const storageConfig = multer.diskStorage({
       __dirname,
       "../../images/plantilla_cursos"
     );
-    const idCurFolder = path.join(
-      plantillaCursosFolder,
-      req.body.nom_cur.toString()
-    );
+    const nomCurFormatted = replaceInvalidChars(req.body.nom_cur.toString());
+
+    const idCurFolder = path.join(plantillaCursosFolder, nomCurFormatted);
 
     // Crea las carpetas si no existen
     if (file) {
@@ -38,7 +38,8 @@ const storageConfig = multer.diskStorage({
   filename: (req, file, cb) => {
     if (file) {
       const fileExtension = file.originalname.split(".").pop();
-      const fileName = `${req.body.nom_cur}_${Date.now()}.${fileExtension}`;
+      const nomCurFormatted = replaceInvalidChars(req.body.nom_cur.toString());
+      const fileName = `${nomCurFormatted}_${Date.now()}.${fileExtension}`;
       cb(null, fileName);
     } else {
       cb(new Error("No file provided"), null);
@@ -68,9 +69,10 @@ const createCurso = async (req, res) => {
     await new Promise((resolve) => setTimeout(resolve, 1000)); // Puedes ajustar el tiempo según sea necesario
 
     const fileName = req.file.filename; // Obtén el nombre del archivo generado automáticamente
+    const nomCurFormatted = replaceInvalidChars(req.body.nom_cur.toString());
 
     // Construye la URL completa de la imagen
-    const imageUrl = `${process.env.URL_SERVER}/images/plantilla_cursos/${body.nom_cur}/${fileName}`;
+    const imageUrl = `${process.env.URL_SERVER}/images/plantilla_cursos/${nomCurFormatted}/${fileName}`;
 
     // Guarda la URL en el cuerpo de la respuesta o en la base de datos
     body.url_cer = imageUrl;
