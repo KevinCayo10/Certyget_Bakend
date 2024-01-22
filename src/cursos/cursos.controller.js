@@ -1,8 +1,9 @@
 const { response } = require("express");
 const storage = require("../config/gcloud");
+const path = require("path");
+const fs = require("fs");
+
 const {
-  createCursos,
-  createPlantillaCerPromise,
   createCursosPromise,
   createDetalleCursos,
   getCursosData,
@@ -13,12 +14,40 @@ const {
 const multer = require("multer");
 // Crea una instancia del bucket de Google Cloud Storage
 
-const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
-const { v4: uuidv4 } = require("uuid");
+// const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
 
-function generateUniqueId() {
-  return uuidv4();
-}
+const storageConfig = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const plantillaCursosFolder = path.join(
+      __dirname,
+      "../../images/plantilla_cursos"
+    );
+    const idCurFolder = path.join(
+      plantillaCursosFolder,
+      req.body.nom_cur.toString()
+    );
+
+    // Crea las carpetas si no existen
+    if (file) {
+      fs.mkdirSync(plantillaCursosFolder, { recursive: true });
+      fs.mkdirSync(idCurFolder, { recursive: true });
+    }
+
+    cb(null, idCurFolder);
+  },
+  filename: (req, file, cb) => {
+    if (file) {
+      const fileExtension = file.originalname.split(".").pop();
+      const fileName = `${req.body.nom_cur}_${Date.now()}.${fileExtension}`;
+      cb(null, fileName);
+    } else {
+      cb(new Error("No file provided"), null);
+    }
+  },
+});
+
+const upload = multer({ storage: storageConfig }).single("url_cer");
+
 // Controlador para crear un nuevo curso
 
 const createCurso = async (req, res) => {
@@ -36,29 +65,18 @@ const createCurso = async (req, res) => {
         .status(400)
         .send({ success: 0, message: "Please upload a file!" });
     }
-    const fileExtension = req.file.originalname.split(".").pop();
-    const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
-    const file = bucket.file(
-      `plantilla_cursos/${body.id_cate_cur}/${fileName}`
-    );
-    // Subir archivo al bucket utilizando un buffer
-    await file.save(req.file.buffer, {
-      resumable: false,
-      contentType: req.file.mimetype, // Asegúrate de que el mimetype sea correcto
-    });
-    // Hacer el archivo público
-    try {
-      await file.makePublic();
-    } catch (error) {
-      console.error("Error al hacer público el archivo:", error);
-    }
-    //Guardar toda la información en la base de datos
-    body.url_cer = file.publicUrl();
-    //1ro Registrar la plantilla
-    //2do Registrar el curso
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Puedes ajustar el tiempo según sea necesario
+
+    const fileName = req.file.filename; // Obtén el nombre del archivo generado automáticamente
+
+    // Construye la URL completa de la imagen
+    const imageUrl = `${process.env.URL_SERVER}/images/plantilla_cursos/${body.nom_cur}/${fileName}`;
+
+    // Guarda la URL en el cuerpo de la respuesta o en la base de datos
+    body.url_cer = imageUrl;
+
     const id_cur = await createCursosPromise(body);
     const ced_inst_array = (body.ced_inst || "").split(",").map(Number); // Dividir la cadena y convertir a números
-    console.log("CED ARRAY : ", ced_inst_array);
     const detallePromises = ced_inst_array.map(async (ced_inst) => {
       const detalle = {
         id_cur: id_cur,
@@ -81,26 +99,6 @@ const createCurso = async (req, res) => {
       success: 1,
       data: detalleResults, // Puedes devolver los resultados de cada inserción si es necesario
     });
-    /*
-    const detalle = {
-      id_cur: id_cur,
-      id_inst: body.ced_inst,
-    };
-    //3ro Registrar el detalle
-    createDetalleCursos(detalle, (err, results) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({
-          success: 0,
-          message: "Database connection errror",
-        });
-      }
-    });
-    return res.status(200).json({
-      success: 1,
-      data: results,
-    });
-    */
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -125,10 +123,11 @@ const updateCurso = async (req, res) => {
       });
     }
   });
-    // Si se adjunta un nuevo archivo, realiza las operaciones correspondientes
+  // Si se adjunta un nuevo archivo, realiza las operaciones correspondientes
   if (req.file) {
-    const fileExtension = req.file.originalname.split(".").pop();
-    const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
+    /*const fileExtension = req.file.originalname.split(".").pop();
+
+    // const fileName = `${body.nom_cur}_${generateUniqueId()}.${fileExtension}`;
     const file = bucket.file(
       `plantilla_cursos/${body.id_cate_cur}/${fileName}`
     );
@@ -143,7 +142,16 @@ const updateCurso = async (req, res) => {
       console.error("Error al hacer público el archivo:", error);
     }
     //Guardar toda la información en la base de datos
-    body.url_cer = file.publicUrl();
+    body.url_cer = file.publicUrl();*/
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Puedes ajustar el tiempo según sea necesario
+
+    const fileName = req.file.filename; // Obtén el nombre del archivo generado automáticamente
+
+    // Construye la URL completa de la imagen
+    const imageUrl = `${process.env.URL_SERVER}/images/plantilla_cursos/${body.nom_cur}/${fileName}`;
+
+    // Guarda la URL en el cuerpo de la respuesta o en la base de datos
+    body.url_cer = imageUrl;
   }
 
   // body.estado_cur = body.estado_cur ? 1 : 0;
@@ -232,4 +240,5 @@ module.exports = {
   updateCurso,
   deleteCursos,
   deleteCursos,
+  upload,
 };
