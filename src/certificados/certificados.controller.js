@@ -1,5 +1,9 @@
-const storage = require("../config/gcloud");
+// const storage = require("../config/gcloud");
 const transporter = require("../helpers/mailer");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+
 const {
   // Importación de funciones desde el servicio de certificados
   getCertificadoByIdCursos,
@@ -14,16 +18,15 @@ const {
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
 } = require("./certificados.service");
+
 // Configuración del almacenamiento en la nube y otros módulos
-const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
-const { v4: uuidv4 } = require("uuid");
-// Función para generar un ID único
-function generateUniqueId() {
-  return uuidv4();
-}
+// const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
+
 // Función para registrar un certificado
 const registerCertificado = async (req, res) => {
   const body = req.body;
+  const file = req.file;
+
   console.log("CER", body);
   console.log("FILE : ", req.file);
   // Validaciones iniciales
@@ -38,35 +41,28 @@ const registerCertificado = async (req, res) => {
       .status(400)
       .send({ success: 0, message: "Please upload a file!" });
   }
-  // Configuración del nombre del archivo y la ruta en el bucket
-  const fileExtension = req.file.originalname.split(".").pop();
-  const fileName = `${body.ced_par}${body.id_cur}.${fileExtension}`;
-  const file = bucket.file(
-    `certificados/${body.ced_par}/${generateUniqueId()}_${fileName}`
-  );
-  // Subida del archivo al bucket utilizando un buffer
-  await file.save(req.file.buffer, {
-    resumable: false,
-    contentType: req.file.mimetype, // Asegúrate de que el mimetype sea correcto
-  });
+  const certificadoFolder = path.join(__dirname, "../../images/certificados");
+  const idCedParFolder = path.join(certificadoFolder, body.ced_par.toString());
 
-  // Hacer el archivo público
-  try {
-    await file.makePublic();
-  } catch (error) {
-    console.error("Error al hacer público el archivo:", error);
-    return res.status(500).send({
-      message: `Uploaded the file successfully: ${fileName}, but public access is denied!`,
-      url: file.publicUrl(),
-    });
-  }
-  //Guardar toda la información en la base de datos
+  // Crea las carpetas si no existen
+  fs.mkdirSync(certificadoFolder, { recursive: true });
+  fs.mkdirSync(idCedParFolder, { recursive: true });
+
+  // Guarda el archivo en la carpeta destino
+  const fileExtension = file.originalname.split(".").pop();
+  const fileName = `${body.nom_cur}_${Date.now()}.${fileExtension}`;
+  const filePath = path.join(idCedParFolder, fileName);
+  fs.writeFileSync(filePath, file.buffer);
+
+  // Construye la URL completa de la imagen
+  const imageUrl = `${process.env.URL_SERVER}/images/certificados/${body.ced_par}/${fileName}`;
+  body.certificado = imageUrl;
   const fechaGenCer = new Date().toISOString().slice(0, 10);
   console.log("FECHA_GEN_CER _ ", fechaGenCer);
 
   // Guardar toda la información en la base de datos
   const data = {
-    url_gen_cer: file.publicUrl(),
+    url_gen_cer: body.certificado,
     estado_cer: 1,
     fecha_gen_cer: fechaGenCer,
     ced_par_cer: body.ced_par,
@@ -82,25 +78,6 @@ const registerCertificado = async (req, res) => {
         message: "Database connection error",
       });
     }
-    /*
-    const rest = await transporter.sendMail({
-      from: process.env.EMAIL,
-      to: body.email_par,
-      subject: `Certificado del curso '${body.nom_cur}'`,
-      html: `<p>Estimado(a) ${body.nom_par} ${body.ape_par},</p>
-    <p>Adjunto el certificado de participación del curso <b></b>.</p>
-    <p>Atentamente,</p>
-    <p>El equipo de Talento Humano MarsupiCode</p>`,
-      attachments: [
-        {
-          filename: `${fileName}`,
-          path: file.publicUrl(),
-          contentType: req.file.mimetype,
-        },
-      ],
-    });
-    console.log(rest);*/
-
     return res.status(200).json({
       success: 1,
       data: results,
