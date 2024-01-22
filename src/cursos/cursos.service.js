@@ -1,20 +1,19 @@
 const pool = require("../config/database");
+const {
+  customFormatDate,
+  formatDateToMySQLTimestamp,
+} = require("../utils/formattedDate");
 // Función para crear cursos
 
 const createCursos = (data, callBack) => {
-  const fechaIniFormatted = new Date(data.fecha_inicio_cur)
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", " ");
-
-  const fechaFinFormatted = new Date(data.fecha_fin_cur)
-    .toISOString()
-    .slice(0, 19)
-    .replace("T", " ");
+  const fechaIniFormatted = customFormatDate(new Date(data.fecha_inicio_cur));
+  const fechaFinFormatted = customFormatDate(new Date(data.fecha_fin_cur));
+  const fechaGenCerFormatted = customFormatDate(new Date()); // Agregar new Date(data.fecha_gen_cer)
+  const fecha_now = formatDateToMySQLTimestamp(new Date());
 
   pool.query(
     `INSERT INTO 
-  cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,url_cer,det_cer, estado_cur, id_cate_cur) VALUES (?,?,?,?,?,?,?,?)`,
+  cursos (nom_cur,fecha_inicio_cur, fecha_fin_cur, dur_cur,url_cer,det_cer, fecha_gen_cer, estado_cur, fecha_creacion_cur,id_cate_cur) VALUES (?,?,?,?,?,?,?,?,?,?)`,
     [
       data.nom_cur,
       fechaIniFormatted,
@@ -22,7 +21,9 @@ const createCursos = (data, callBack) => {
       data.dur_cur,
       data.url_cer,
       data.det_cer,
+      fechaGenCerFormatted,
       1,
+      fecha_now,
       data.id_cate_cur,
     ],
     (err, res) => {
@@ -135,7 +136,7 @@ LEFT JOIN detalle_cursos dc ON c.id_cur = dc.id_cur
 LEFT JOIN autoridades i ON dc.id_inst = i.ced_inst
 -- WHERE c.estado_cur = 1
 GROUP BY c.id_cur, cat.nom_cate, c.estado_cur  -- Incluye las columnas necesarias para GROUP BY
-ORDER BY c.estado_cur DESC`,
+ORDER BY c.fecha_creacion_cur DESC`,
     [],
     (err, results) => {
       if (err) {
