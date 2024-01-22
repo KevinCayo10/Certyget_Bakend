@@ -1,4 +1,7 @@
 const storage = require("../config/gcloud");
+const path = require("path");
+const fs = require("fs");
+
 const {
   createInstuctores,
   deleteInstructors,
@@ -9,15 +12,38 @@ const {
 const multer = require("multer");
 // Configura el bucket de almacenamiento en Google Cloud utilizando el módulo importado
 
-const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
+// const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
 // Importa la función UUID del módulo uuid
 
-const { v4: uuidv4 } = require("uuid");
-// Función para generar un ID único utilizando UUID
+const storageConfig = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const plantillaCursosFolder = path.join(__dirname, "../../images/firmas");
+    const idCurFolder = path.join(
+      plantillaCursosFolder,
+      req.body.ced_inst.toString()
+    );
 
-function generateUniqueId() {
-  return uuidv4();
-}
+    // Crea las carpetas si no existen
+    if (file) {
+      fs.mkdirSync(plantillaCursosFolder, { recursive: true });
+      fs.mkdirSync(idCurFolder, { recursive: true });
+    }
+
+    cb(null, idCurFolder);
+  },
+  filename: (req, file, cb) => {
+    if (file) {
+      const fileExtension = file.originalname.split(".").pop();
+      const fileName = `${req.body.ced_inst}_${Date.now()}.${fileExtension}`;
+      cb(null, fileName);
+    } else {
+      cb(new Error("No file provided"), null);
+    }
+  },
+});
+
+const upload = multer({ storage: storageConfig }).single("url_firma");
+
 // Función para registrar un instructor
 
 const registerInstructor = async (req, res) => {
@@ -37,6 +63,16 @@ const registerInstructor = async (req, res) => {
         .send({ success: 0, message: "Please upload a file!" });
     }
 
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // Puedes ajustar el tiempo según sea necesario
+
+    const fileName = req.file.filename;
+    console.log(fileName);
+    // Construye la URL completa de la imagen
+    const imageUrl = `${process.env.URL_SERVER}/images/firmas/${body.ced_inst}/${fileName}`;
+    console.log(imageUrl);
+    // Guarda la URL en el cuerpo de la respuesta o en la base de datos
+    body.url_firma = imageUrl;
+    /*
     const fileExtension = req.file.originalname.split(".").pop();
     const fileName = `${body.ced_inst}_${generateUniqueId()}.${fileExtension}`;
     const file = bucket.file(`firmas_autoridades/${body.ced_inst}/${fileName}`);
@@ -58,6 +94,7 @@ const registerInstructor = async (req, res) => {
     }
     //Guardar toda la información en la base de datos
     body.url_firma = file.publicUrl();
+    */
     createInstuctores(body, (err, results) => {
       if (err) {
         console.log(err);
@@ -117,9 +154,6 @@ const updateInstructor = async (req, res) => {
   try {
     //Verficar si existe el archivo
     const body = req.body;
-    console.log("INST : ", body);
-    console.log("INST FILE  : ", req.file);
-
     const ced_inst = req.params.ced_inst;
     if (!body) {
       return res
@@ -133,6 +167,16 @@ const updateInstructor = async (req, res) => {
         .send({ success: 0, message: "Please there is not ced_inst" });
     }
     if (req.file) {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Puedes ajustar el tiempo según sea necesario
+
+      const fileName = req.file.filename;
+      console.log(fileName);
+      // Construye la URL completa de la imagen
+      const imageUrl = `${process.env.URL_SERVER}/images/firmas/${body.ced_inst}/${fileName}`;
+
+      // Guarda la URL en el cuerpo de la respuesta o en la base de datos
+      body.url_firma = imageUrl;
+      /*
       const fileExtension = req.file.originalname.split(".").pop();
       const fileName = `${ced_inst}_${generateUniqueId()}.${fileExtension}`;
       const file = bucket.file(`firmas_autoridades/${ced_inst}/${fileName}`);
@@ -155,6 +199,7 @@ const updateInstructor = async (req, res) => {
       }
       //Guardar toda la información en la base de datos
       body.url_firma = file.publicUrl();
+     */
     }
     // Actualiza la información del instructor en la base de datos
 
@@ -199,4 +244,5 @@ module.exports = {
   getInstructors,
   getInstructor,
   updateInstructor,
+  upload,
 };
