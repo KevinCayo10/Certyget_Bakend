@@ -10,6 +10,7 @@ const {
   deleteCursoInDetalleCursos,
   updateCursosByCursos,
   deleteCursoByIdCursos,
+  getCursosByName,
 } = require("./cursos.service");
 const multer = require("multer");
 const { replaceInvalidChars } = require("../utils/invalidChars");
@@ -236,11 +237,25 @@ const deleteCursos = (req, res) => {
 };
 // Exporta los controladores para su uso en otras partes de la aplicación
 
+const getCursosByNameCurso = (req, res) => {
+  const nom_cur = req.params.nom_cur;
+  getCursosByName(nom_cur, (err, results) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    return res.json({
+      success: 1,
+      data: results,
+    });
+  });
+};
 module.exports = {
   createCurso,
   getCursos,
   updateCurso,
   deleteCursos,
   deleteCursos,
+  getCursosByNameCurso,
   upload,
 };

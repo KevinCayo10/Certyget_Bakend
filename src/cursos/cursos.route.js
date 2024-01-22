@@ -10,10 +10,12 @@ const {
   updateCurso,
   deleteCursos,
   upload,
+  getCursosByNameCurso,
 } = require("./cursos.controller.js");
 // Configura las rutas del router
 routerCursos.post("/", upload, createCurso);
 routerCursos.get("/", getCursos);
+routerCursos.get("/search/:nom_cur", getCursosByNameCurso);
 routerCursos.put("/:id_cur", upload, updateCurso);
 routerCursos.delete("/:id_cur", deleteCursos);
 // Exporta el router configurado para su uso en otras partes de la aplicación

@@ -226,13 +226,18 @@ const deleteCursoByIdCursos = (id_cur, callBack) => {
 };
 // Función para obtener datos de cursos filtrados para aplicaciones móviles
 
-const getCursosFilterMobile = (callBack) => {
+const getCursosByName = (nom_cur, callBack) => {
   pool.query(
-    `SELECT 
-    c.*,
-    cat.nom_cate,
-    GROUP_CONCAT(i.ced_inst) AS ced_inst`,
-    []
+    `SELECT * 
+    FROM cursos 
+    WHERE  nom_cur LIKE ?`,
+    [`%${nom_cur}%`],
+    (err, results) => {
+      if (err) {
+        return callBack(err);
+      }
+      return callBack(null, results);
+    }
   );
 };
 // Exporta todas las funciones para su uso en otros archivos
@@ -248,4 +253,5 @@ module.exports = {
   deleteCursoInDetalleCursos,
   deleteCursoByIdCursos,
   getInstructoreByIdCurso,
+  getCursosByName,
 };
