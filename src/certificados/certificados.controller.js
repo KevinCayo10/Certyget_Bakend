@@ -1,6 +1,5 @@
 // const storage = require("../config/gcloud");
 const transporter = require("../helpers/mailer");
-const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
@@ -17,7 +16,9 @@ const {
   validateCertificadoByCodGenCer,
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
+  getCertificadoByCedNameEmail,
 } = require("./certificados.service");
+const { replaceInvalidChars } = require("../utils/invalidChars");
 
 // Configuración del almacenamiento en la nube y otros módulos
 // const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
@@ -50,7 +51,9 @@ const registerCertificado = async (req, res) => {
 
   // Guarda el archivo en la carpeta destino
   const fileExtension = file.originalname.split(".").pop();
-  const fileName = `${body.nom_cur}_${Date.now()}.${fileExtension}`;
+  const nomCurFormatted = replaceInvalidChars(body.nom_cur);
+
+  const fileName = `${nomCurFormatted}_${Date.now()}.${fileExtension}`;
   const filePath = path.join(idCedParFolder, fileName);
   fs.writeFileSync(filePath, file.buffer);
 
@@ -322,7 +325,6 @@ const searchCertificados = (req, res) => {
   });
 };
 // Exportar los controladores como módulos
-
 module.exports = {
   getCertificadosByCursos,
   getDetalleCursosInstructores,
