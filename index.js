@@ -4,20 +4,19 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const pool = require("./src/config/database");
-const { route } = require("./src/users/user.route");
 // Importa los enrutadores
 const routerUser = require("./src/users/user.route");
 const routerCategory = require("./src/categorias/categorias.route");
 const routerInstructores = require("./src/instructores/instructores.route");
 const routerCursos = require("./src/cursos/cursos.route");
 const routerCertificados = require("./src/certificados/certificados.route");
+const path = require("path");
+
 // Crea una instancia de la aplicación Express
 const app = express();
 // Configura la aplicación para usar JSON y CORS
 app.use(express.json());
 app.use(cors());
-
-// Establece una conexión inicial con la base de datos
 pool.getConnection((err, connection) => {
   if (err) {
     console.error("Error al obtener una conexión del pool:", err);
@@ -31,6 +30,8 @@ app.use("/api/category", routerCategory);
 app.use("/api/instructor", routerInstructores);
 app.use("/api/cursos", routerCursos);
 app.use("/api/certificados", routerCertificados);
+app.use("/images", express.static(path.join(__dirname, "images")));
+
 // Configura el puerto del servidor, utilizando el proporcionado en las variables de entorno o el puerto 4000 por defecto
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
