@@ -302,6 +302,25 @@ const validarCertificado = (req, res) => {
     });
   });
 };
+const searchCertificados = (req, res) => {
+  const search = req.params.search;
+  getCertificadoByCedNameEmail(search, (err, results) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    if (!results) {
+      return res.json({
+        success: 0,
+        message: "Record not found",
+      });
+    }
+    return res.json({
+      success: 1,
+      data: results,
+    });
+  });
+};
 // Exportar los controladores como módulos
 
 module.exports = {
@@ -314,4 +333,5 @@ module.exports = {
   getCertificadoByCedAndApe,
   validarCertificado,
   getCertificadoByCursoAndCedAndApe,
+  searchCertificados,
 };

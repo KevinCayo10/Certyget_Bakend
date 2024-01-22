@@ -277,6 +277,30 @@ const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
     }
   );
 };
+
+const getCertificadoByCedNameEmail = (search, callBack) => {
+  pool.query(
+    `SELECT
+    gc.*,
+    p.*
+  FROM
+    generar_certificados gc
+  JOIN
+    participantes p ON p.ced_par = gc.ced_par_cer
+  WHERE
+    p.ced_par  LIKE  ?
+    OR p.ape_pat_par  LIKE  ?
+    OR p.email_par  LIKE  ?
+    AND gc.estado_cer = 1`,
+    [`%${search}%`, `%${search}%`, `%${search}%`],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      return callBack(null, results);
+    }
+  );
+};
 // Exportar las funciones para su uso en otras partes de la aplicación
 module.exports = {
   getCertificadoByIdCursos,
@@ -291,4 +315,5 @@ module.exports = {
   validateCertificadoByCodGenCer,
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
+  getCertificadoByCedNameEmail,
 };
