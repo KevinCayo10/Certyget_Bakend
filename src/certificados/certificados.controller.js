@@ -70,8 +70,8 @@ const registerCertificado = async (req, res) => {
     fecha_gen_cer: fechaGenCer,
     ced_par_cer: body.ced_par,
     id_cur_cer: body.id_cur,
+    cod_gen_cer: body.cod_gen_cer,
   };
-  console.log("BODY: ", body);
   // Manejador para crear un certificado
   createCertificado(data, async (err, results) => {
     if (err) {
@@ -285,9 +285,7 @@ const getCertificadoByCursoAndCedAndApe = (req, res) => {
 };
 // Endpoint para validar un certificado por código generado
 const validarCertificado = (req, res) => {
-  console.log("HOLA MUNDO");
   const cod_gen_cer = req.params.cod_gen_cer;
-  console.log("COD : ", cod_gen_cer);
   validateCertificadoByCodGenCer(cod_gen_cer, (err, results) => {
     if (err) {
       console.log(err);
