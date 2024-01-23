@@ -1,6 +1,5 @@
 // const storage = require("../config/gcloud");
 const transporter = require("../helpers/mailer");
-const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
@@ -17,7 +16,9 @@ const {
   validateCertificadoByCodGenCer,
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
+  getCertificadoByCedNameEmail,
 } = require("./certificados.service");
+const { replaceInvalidChars } = require("../utils/invalidChars");
 
 // Configuración del almacenamiento en la nube y otros módulos
 // const bucket = storage.bucket(`${process.env.BUCKET_NAME}`);
@@ -50,7 +51,9 @@ const registerCertificado = async (req, res) => {
 
   // Guarda el archivo en la carpeta destino
   const fileExtension = file.originalname.split(".").pop();
-  const fileName = `${body.nom_cur}_${Date.now()}.${fileExtension}`;
+  const nomCurFormatted = replaceInvalidChars(body.nom_cur);
+
+  const fileName = `${nomCurFormatted}_${Date.now()}.${fileExtension}`;
   const filePath = path.join(idCedParFolder, fileName);
   fs.writeFileSync(filePath, file.buffer);
 
@@ -67,8 +70,8 @@ const registerCertificado = async (req, res) => {
     fecha_gen_cer: fechaGenCer,
     ced_par_cer: body.ced_par,
     id_cur_cer: body.id_cur,
+    cod_gen_cer: body.cod_gen_cer,
   };
-  console.log("BODY: ", body);
   // Manejador para crear un certificado
   createCertificado(data, async (err, results) => {
     if (err) {
@@ -282,9 +285,7 @@ const getCertificadoByCursoAndCedAndApe = (req, res) => {
 };
 // Endpoint para validar un certificado por código generado
 const validarCertificado = (req, res) => {
-  console.log("HOLA MUNDO");
   const cod_gen_cer = req.params.cod_gen_cer;
-  console.log("COD : ", cod_gen_cer);
   validateCertificadoByCodGenCer(cod_gen_cer, (err, results) => {
     if (err) {
       console.log(err);
@@ -302,8 +303,26 @@ const validarCertificado = (req, res) => {
     });
   });
 };
+const searchCertificados = (req, res) => {
+  const search = req.params.search;
+  getCertificadoByCedNameEmail(search, (err, results) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+    if (!results) {
+      return res.json({
+        success: 0,
+        message: "Record not found",
+      });
+    }
+    return res.json({
+      success: 1,
+      data: results,
+    });
+  });
+};
 // Exportar los controladores como módulos
-
 module.exports = {
   getCertificadosByCursos,
   getDetalleCursosInstructores,
@@ -314,4 +333,5 @@ module.exports = {
   getCertificadoByCedAndApe,
   validarCertificado,
   getCertificadoByCursoAndCedAndApe,
+  searchCertificados,
 };

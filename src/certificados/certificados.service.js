@@ -1,5 +1,6 @@
 // Importar el módulo de conexión a la base de datos
 const pool = require("../config/database");
+const { buildCode } = require("../utils/generateCode");
 // Función para obtener información de certificados
 const getCertificadoData = (callBack) => {
   pool.query(
@@ -62,13 +63,13 @@ const createCertificado = (data, callBack) => {
           message: "Ya existe un certificado con estos valores",
         });
       }
-
+      console.log(data);
       // Si no hay duplicados, proceder con la inserción
       pool.query(
         `INSERT INTO generar_certificados(url_gen_cer, cod_gen_cer, estado_cer, fecha_gen_cer, ced_par_cer,id_cur_cer) VALUES(?,?,?,?,?,?)`,
         [
           data.url_gen_cer,
-          data.id_cur_cer + data.ced_par_cer,
+          data.cod_gen_cer,
           data.estado_cer,
           data.fecha_gen_cer,
           data.ced_par_cer,
@@ -136,6 +137,7 @@ const getDetalleInstructoresByIdCurso = (id_cur, callBack) => {
 // Función para registrar participantes
 const createParticipantes = (data, callBack) => {
   // Mapea el array de participantes y crea un array de valores para cada participante
+  console.log(data);
   const participantesValues = data.map((participante) => [
     participante.ced_par,
     participante.nom_pat_par,
@@ -277,6 +279,30 @@ const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
     }
   );
 };
+
+const getCertificadoByCedNameEmail = (search, callBack) => {
+  pool.query(
+    `SELECT
+    gc.*,
+    p.*
+  FROM
+    generar_certificados gc
+  JOIN
+    participantes p ON p.ced_par = gc.ced_par_cer
+  WHERE
+    p.ced_par  LIKE  ?
+    OR p.ape_pat_par  LIKE  ?
+    OR p.email_par  LIKE  ?
+    AND gc.estado_cer = 1`,
+    [`%${search}%`, `%${search}%`, `%${search}%`],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      return callBack(null, results);
+    }
+  );
+};
 // Exportar las funciones para su uso en otras partes de la aplicación
 module.exports = {
   getCertificadoByIdCursos,
@@ -291,4 +317,5 @@ module.exports = {
   validateCertificadoByCodGenCer,
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
+  getCertificadoByCedNameEmail,
 };
