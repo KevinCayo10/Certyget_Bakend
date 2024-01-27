@@ -19,7 +19,7 @@ const {
 const upload = multer({ storage: multer.memoryStorage() });
 
 routerCertificados.post("/", upload.single("certificado"), registerCertificado);
-routerCertificados.get("/search/:search", searchCertificados);
+routerCertificados.get("/search/", searchCertificados);
 routerCertificados.get("/detalle/:id_cur", getDetalleCursosInstructores);
 routerCertificados.get("/:id_cur", getCertificadosByCursos);
 routerCertificados.get("/:ced_par/:ape_par", getCertificadoByCedAndApe);
