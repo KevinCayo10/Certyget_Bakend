@@ -1,6 +1,5 @@
 // Importar el módulo de conexión a la base de datos
 const pool = require("../config/database");
-const { buildCode } = require("../utils/generateCode");
 // Función para obtener información de certificados
 const getCertificadoData = (callBack) => {
   pool.query(
@@ -280,21 +279,44 @@ const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
   );
 };
 
-const getCertificadoByCedNameEmail = (search, callBack) => {
+const getCertificadoByCedNameEmail = (search, id_cur, callBack) => {
   pool.query(
     `SELECT
-    gc.*,
-    p.*
-  FROM
-    generar_certificados gc
-  JOIN
-    participantes p ON p.ced_par = gc.ced_par_cer
-  WHERE
-    p.ced_par  LIKE  ?
-    OR p.ape_pat_par  LIKE  ?
-    OR p.email_par  LIKE  ?
-    AND gc.estado_cer = 1`,
-    [`%${search}%`, `%${search}%`, `%${search}%`],
+  gc.*,
+  p.*
+FROM
+  generar_certificados gc
+JOIN
+  participantes p ON p.ced_par = gc.ced_par_cer
+WHERE
+  (p.ced_par LIKE ? OR p.ape_pat_par LIKE ? OR p.email_par LIKE ?)
+  AND gc.estado_cer = 1;
+`,
+    [`%${search}%`, `%${search}%`, `%${search}%`, id_cur],
+    (error, results, fields) => {
+      if (error) {
+        callBack(error);
+      }
+      return callBack(null, results);
+    }
+  );
+};
+
+const getCertificadoByCedNameEmailAndIdCur = (search, id_cur, callBack) => {
+  pool.query(
+    `SELECT
+  gc.*,
+  p.*
+FROM
+  generar_certificados gc
+JOIN
+  participantes p ON p.ced_par = gc.ced_par_cer
+WHERE
+  (p.ced_par LIKE ? OR p.ape_pat_par LIKE ? OR p.email_par LIKE ?)
+  AND gc.id_cur_cer = ?
+  AND gc.estado_cer = 1;
+`,
+    [`%${search}%`, `%${search}%`, `%${search}%`, id_cur],
     (error, results, fields) => {
       if (error) {
         callBack(error);
@@ -318,4 +340,5 @@ module.exports = {
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
   getCertificadoByCedNameEmail,
+  getCertificadoByCedNameEmailAndIdCur,
 };

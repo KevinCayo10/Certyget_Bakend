@@ -17,6 +17,7 @@ const {
   getCursosByPar,
   getCertificadosDataByCursosAndParticipante,
   getCertificadoByCedNameEmail,
+  getCertificadoByCedNameEmailAndIdCur,
 } = require("./certificados.service");
 const { replaceInvalidChars } = require("../utils/invalidChars");
 
@@ -304,23 +305,70 @@ const validarCertificado = (req, res) => {
   });
 };
 const searchCertificados = (req, res) => {
-  const search = req.params.search;
-  getCertificadoByCedNameEmail(search, (err, results) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    if (!results) {
+  const body = req.query;
+  console.log(body);
+  const { search, id_cur } = body;
+
+  if (search && search.length > 0 && id_cur !== "null" && id_cur.length > 0) {
+    console.log("1");
+    getCertificadoByCedNameEmailAndIdCur(search, id_cur, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: 0,
+          message: "Record not found",
+        });
+      }
       return res.json({
-        success: 0,
-        message: "Record not found",
+        success: 1,
+        data: results,
       });
-    }
-    return res.json({
-      success: 1,
-      data: results,
     });
-  });
+  } else if (
+    search &&
+    search.length > 0 &&
+    (id_cur == "null" || id_cur.length == 0)
+  ) {
+    console.log("2");
+
+    getCertificadoByCedNameEmail(body.search, body.id_cur, (err, results) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!results) {
+        return res.json({
+          success: 0,
+          message: "Record not found",
+        });
+      }
+      return res.json({
+        success: 1,
+        data: results,
+      });
+    });
+  } else if (search.length == 0 && id_cur !== "null" && id_cur.length > 0) {
+    console.log("3");
+    getCertificadoByIdCursos(id_cur, (err, result) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+      if (!result) {
+        return res.json({
+          success: 0,
+          message: "Record not found",
+        });
+      }
+      return res.json({
+        success: 1,
+        data: result,
+      });
+    });
+  }
 };
 // Exportar los controladores como módulos
 module.exports = {
