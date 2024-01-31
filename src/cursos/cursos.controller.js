@@ -211,6 +211,7 @@ const getCursos = (req, res) => {
           : [Number(curso.ced_inst)],
     }));
 
+    console.log(cursosConInstructores);
     return res.json({
       success: 1,
       data: cursosConInstructores,
@@ -244,6 +245,7 @@ const getCursosByNameCurso = (req, res) => {
       console.log(err);
       return;
     }
+    console.log("search: ", results);
     return res.json({
       success: 1,
       data: results,

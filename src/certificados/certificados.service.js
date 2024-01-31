@@ -10,7 +10,7 @@ const getCertificadoData = (callBack) => {
       generar_certificados gc
     JOIN
       participantes p ON p.ced_par = gc.ced_par_cer
-    AND gc.estado_cer=1`,
+    `,
     [],
     (error, results, fields) => {
       if (error) {
@@ -35,7 +35,7 @@ const getCertificadoByIdCursos = (id_cur, callBack) => {
       cursos c ON c.id_cur = gc.id_cur_cer
     WHERE
       gc.id_cur_cer= ?
-      AND gc.estado_cer=1`,
+      `,
     [id_cur],
     (error, results, fields) => {
       if (error) {
@@ -267,7 +267,7 @@ const validateCertificadoByCodGenCer = (cod_gen_cer, callBack) => {
     participantes p ON p.ced_par = gc.ced_par_cer
     JOIN
     cursos c ON c.id_cur=gc.id_cur_cer
-    WHERE cod_gen_cer=?`,
+    WHERE cod_gen_cer=? AND gc.estado_cer=1`,
     [cod_gen_cer],
     (error, results, fields) => {
       if (error) {
